@@ -28,8 +28,9 @@ func (n *Nonce) Next() uint64 {
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
+	// time
 	if n.useTime {
-		ts := uint64(time.Now().UTC().UnixNano())
+		ts := uint64(time.Now().UTC().Unix() * 1000)
 		if ts <= n.nonce {
 			n.nonce++
 		} else {
@@ -38,6 +39,8 @@ func (n *Nonce) Next() uint64 {
 		return n.nonce
 	}
 
+	// just nonce
+	ret := n.nonce
 	n.nonce++
-	return n.nonce
+	return ret
 }

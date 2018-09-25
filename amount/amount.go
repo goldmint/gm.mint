@@ -1,6 +1,8 @@
 package amount
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"strings"
@@ -8,6 +10,13 @@ import (
 
 // Precision of amount
 const Precision = 18
+
+// New amount
+func New() *Amount {
+	return &Amount{
+		Value: big.NewInt(0),
+	}
+}
 
 // NewInteger amount: 100 => 100.000000000000000000
 func NewInteger(i int64) *Amount {
@@ -97,4 +106,28 @@ func (a *Amount) Fraction(width uint) string {
 	ret := big.NewInt(0).Abs(a.Value)
 	ret.Mod(ret, big.NewInt(0).Exp(big.NewInt(10), big.NewInt(Precision), nil))
 	return fmt.Sprintf(fmt.Sprintf("%%0%ds", width), ret.Text(10))
+}
+
+// ---
+
+// MarshalJSON ...
+func (a *Amount) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a.String())
+}
+
+// UnmarshalJSON ...
+func (a *Amount) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+
+	tmp := NewFloatString(s)
+	if tmp == nil {
+		return errors.New("Failed to parse amount from `" + s + "`")
+	}
+
+	*a = *tmp
+
+	return nil
 }

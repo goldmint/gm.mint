@@ -1,6 +1,7 @@
 package amount
 
 import (
+	"encoding/json"
 	"math/big"
 	"testing"
 )
@@ -101,5 +102,66 @@ func TestAmount_Fraction(t *testing.T) {
 				t.Errorf("Amount.Fraction() = %v, want2 %v", got, tt.want2)
 			}
 		})
+	}
+}
+
+func TestAmount_ToFromJson(t *testing.T) {
+
+	a := NewFloatString("-987654321987654321.123456789123456789")
+
+	jbytes, err := json.Marshal(a)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	b := NewInteger(0)
+	err = json.Unmarshal(jbytes, b)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if a.Value.Cmp(b.Value) != 0 {
+		t.Fatal("a != b")
+	}
+
+	// ---
+
+	type Tst struct {
+		X *Amount `json:"x,omitempty"`
+		Y *Amount `json:"y,omitempty"`
+		Z *Amount `json:"z,omitempty"`
+	}
+	tst := Tst{
+		X: NewFloatString("-987654321987654321.123456789123456789"),
+		Y: nil,
+		Z: NewFloatString("666"),
+	}
+
+	jbytes, err = json.Marshal(tst)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tst2 := Tst{
+		X: NewInteger(0),
+		Y: NewInteger(0),
+		Z: NewInteger(0),
+	}
+
+	err = json.Unmarshal(jbytes, &tst2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if tst.X.Value.Cmp(tst2.X.Value) != 0 {
+		t.Fatal("x1 != x2")
+	}
+
+	if tst2.Y.Value.Cmp(big.NewInt(0)) != 0 {
+		t.Fatal("y2 != 0")
+	}
+
+	if tst.Z.Value.Cmp(tst2.Z.Value) != 0 {
+		t.Fatal("z1 != z2")
 	}
 }

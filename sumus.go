@@ -3,45 +3,9 @@ package sumus
 import (
 	"fmt"
 	"hash/crc32"
-	"strings"
 
 	"github.com/mr-tron/base58/base58"
 )
-
-// Token (asset) in Sumus blockchain
-type Token uint16
-
-const (
-	// TokenMNT is MNT
-	TokenMNT Token = iota
-	// TokenGOLD is GOLD
-	TokenGOLD
-)
-
-// ParseToken from string
-func ParseToken(s string) (Token, error) {
-	s = strings.ToLower(s)
-	switch s {
-	case "utility":
-		return TokenMNT, nil
-	case "commodity":
-		return TokenGOLD, nil
-	}
-	return 0, fmt.Errorf("Unknown token `%v`", s)
-}
-
-// ToToken from uint16
-func ToToken(u uint16) (Token, error) {
-	switch u {
-	case 0:
-		return TokenMNT, nil
-	case 1:
-		return TokenGOLD, nil
-	}
-	return 0, fmt.Errorf("Unknown token `%v`", u)
-}
-
-// ---
 
 // Unpack58 from string
 func Unpack58(data string) ([]byte, error) {

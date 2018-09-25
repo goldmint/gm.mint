@@ -181,3 +181,28 @@ func TestUnpackHash(t *testing.T) {
 		})
 	}
 }
+
+func TestSigning(t *testing.T) {
+
+	nonce := uint64(1)
+	src58 := "PRIVATE"
+	dst58 := "PUB"
+
+	token := sumus.TokenGOLD
+	tokenAmount := amount.NewFloatString("-0.3")
+
+	// ---
+
+	srcpk, _ := sumus.Unpack58(src58)
+	src, _ := signer.NewSignerFromPK(srcpk)
+
+	dst, _ := sumus.Unpack58(dst58)
+
+	txhash, txdata, err := TransferAsset(src, nonce, dst, token, tokenAmount)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log("TX DATA:", txdata)
+	t.Log("TX HASH:", txhash)
+}

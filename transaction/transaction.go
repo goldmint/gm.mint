@@ -1,7 +1,6 @@
 package transaction
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/void616/gm-sumus-lib"
@@ -13,8 +12,6 @@ import (
 
 // New transaction
 func New(signer *signer.Signer, nonce uint64) *Transaction {
-	nonce++
-
 	tx := &Transaction{
 		nonce:  nonce,
 		signer: signer,
@@ -26,6 +23,8 @@ func New(signer *signer.Signer, nonce uint64) *Transaction {
 
 	return tx
 }
+
+// ---
 
 // Transaction data
 type Transaction struct {
@@ -120,116 +119,19 @@ func TransferAsset(signer *signer.Signer, nonce uint64, address []byte, token su
 	return tx.Construct()
 }
 
-// ---
+// UserData transaction
+func UserData(signer *signer.Signer, nonce uint64, data []byte) (string, string, error) {
 
-// PackHash for specific addr/nonce
-func PackHash(addr []byte, nonce uint64) (string, error) {
-	if addr == nil || len(addr) != 32 {
-		return "", fmt.Errorf("Address should be 32 bytes length")
-	}
-	ser := serializer.NewSerializer()
-	ser.PutBytes(addr)
-	ser.PutUint64(nonce)
-	b, err := ser.Data()
-	if err != nil {
-		return "", err
-	}
-	return sumus.Pack58(b), nil
-}
-
-// UnpackHash and get addr/nonce
-func UnpackHash(hash string) (addr []byte, nonce uint64, err error) {
-	b, err := sumus.Unpack58(hash)
-	if err != nil {
-		return nil, 0, err
-	}
-	if len(b) != 40 {
-		return nil, 0, fmt.Errorf("Invalid hash length")
+	if data == nil {
+		return "", "", fmt.Errorf("Data is empty")
 	}
 
-	des := serializer.NewDeserializer(b)
-	baddr := des.GetBytes(32)
-	bnonce := des.GetUint64()
-	if des.Error() != nil {
-		return nil, 0, des.Error()
-	}
+	tx := New(signer, nonce)
 
-	return baddr, bnonce, nil
-}
+	// payload
+	tx.ser.PutBytes(signer.PublicKey()) // public key
+	tx.ser.PutUint32(uint32(len(data))) // data size
+	tx.ser.PutBytes(data)               // data bytes
 
-// Verify transaction payload
-func Verify(address, payload, signature []byte) error {
-	if address == nil || payload == nil || signature == nil {
-		return fmt.Errorf("Null argument specified")
-	}
-
-	// make payload digest
-	hasher := sha3.New256()
-	_, err := hasher.Write(payload)
-	if err != nil {
-		return err
-	}
-	digest := hasher.Sum(nil)
-
-	// verify
-	return signer.Verify(address, digest, signature)
-}
-
-// VerifyAssetTransaction with payload check
-func VerifyAssetTransaction(tx, sourceAddr, expDestAddr []byte, expNonce *uint64, expToken *sumus.Token, expTokenAmount *amount.Amount) error {
-
-	if tx == nil || len(tx) == 0 {
-		return fmt.Errorf("Transaction bytes array is null or empty")
-	}
-
-	// get payload and signature
-	des := serializer.NewDeserializer(tx)
-	txPayload := des.GetBytes(89)
-	tSigned := des.GetByte()
-	tSignature := des.GetBytes(64)
-	err := des.Error()
-	if err != nil {
-		return fmt.Errorf("Failed to get payload and signature")
-	}
-
-	// is signed?
-	if tSigned != 1 {
-		return fmt.Errorf("Is not signed")
-	}
-
-	// verify signature
-	err = Verify(sourceAddr, txPayload, tSignature)
-	if err != nil {
-		return fmt.Errorf("Failed to verify signature")
-	}
-
-	// read payload
-	desPayload := serializer.NewDeserializer(txPayload)
-	tNonce := desPayload.GetUint64()
-	tToken := desPayload.GetUint16()
-	tSource := desPayload.GetBytes(32)
-	tDestination := desPayload.GetBytes(32)
-	tTokenAmount := desPayload.GetAmount()
-	err = desPayload.Error()
-	if err != nil {
-		return fmt.Errorf("Failed to read payload")
-	}
-
-	if expNonce != nil && tNonce != *expNonce {
-		return fmt.Errorf("Invalid nonce")
-	}
-	if expToken != nil && tToken != uint16(*expToken) {
-		return fmt.Errorf("Invalid token")
-	}
-	if !bytes.Equal(tSource, sourceAddr) {
-		return fmt.Errorf("Invalid source address")
-	}
-	if expDestAddr != nil && !bytes.Equal(tDestination, expDestAddr) {
-		return fmt.Errorf("Invalid destination address")
-	}
-	if tTokenAmount == nil || tTokenAmount.Value == nil || (expTokenAmount != nil && tTokenAmount.Value.Cmp(expTokenAmount.Value) != 0) {
-		return fmt.Errorf("Invalid token amount")
-	}
-
-	return nil
+	return tx.Construct()
 }

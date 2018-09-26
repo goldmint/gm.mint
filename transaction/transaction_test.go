@@ -13,7 +13,7 @@ func TestRegisterNode(t *testing.T) {
 	spvt, _ := sumus.Unpack58("TBzyWv8Dga5aN4Hai2nFTwyTXvDJKkJhq8HMDPC9zqTWLSTLo4jFFKKnVS52a1kp7YJdm2b8HrR2Buk9PqyD1DwhxUzsJ")
 	sig, _ := signer.NewSignerFromPK(spvt)
 
-	_, tx, err := RegisterNode(sig, 0, "chupachups")
+	_, tx, err := RegisterNode(sig, 1, "chupachups")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func TestUnregisterNode(t *testing.T) {
 	spvt, _ := sumus.Unpack58("TBzyWv8Dga5aN4Hai2nFTwyTXvDJKkJhq8HMDPC9zqTWLSTLo4jFFKKnVS52a1kp7YJdm2b8HrR2Buk9PqyD1DwhxUzsJ")
 	sig, _ := signer.NewSignerFromPK(spvt)
 
-	_, tx, err := UnregisterNode(sig, 1)
+	_, tx, err := UnregisterNode(sig, 2)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestTransferAsset(t *testing.T) {
 	dstpk, _ := sumus.Unpack58("FhM2u3UMtexZ3TU57G6d9iDpcmynBSpzmTZq6YaMPeA6DHFdEht3jcZUDpXyVbXGoXoWiYB9z8QVKjGhZuKCqMGYZE2P6")
 	dst, _ := signer.NewSignerFromPK(dstpk)
 
-	_, tx, err := TransferAsset(src, 2, dst.PublicKey(), 0, amount.NewFloatString("1000"))
+	_, tx, err := TransferAsset(src, 3, dst.PublicKey(), 0, amount.NewFloatString("1000"))
 	if err != nil {
 		t.Fatal(err)
 	}

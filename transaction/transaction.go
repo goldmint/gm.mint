@@ -1,7 +1,7 @@
 package transaction
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/void616/gm-sumus-lib"
 	"github.com/void616/gm-sumus-lib/amount"
@@ -10,128 +10,140 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
-// New transaction
-func New(signer *signer.Signer, nonce uint64) *Transaction {
-	tx := &Transaction{
-		nonce:  nonce,
-		signer: signer,
-		ser:    serializer.NewSerializer(),
-	}
+// TxTransferAsset is token transfering transaction
+const TxTransferAsset = "TransferAssetsTransaction"
 
-	// write nonce
-	tx.ser.PutUint64(nonce)
+// TxRegisterNode node registration transaction
+const TxRegisterNode = "RegisterNodeTransaction"
 
-	return tx
+// TxUnregisterNode node registration transaction
+const TxUnregisterNode = "UnregisterNodeTransaction"
+
+// TxUserData is custom user transaction
+const TxUserData = "UserDataTransaction"
+
+// Transaction data
+type Transaction struct {
+	// Name
+	Name string
+	// Nonce
+	Nonce uint64
+	// Signer public key, packed
+	Signer string
+	// Hash, packed
+	Hash string
+	// Digest, packed
+	Digest string
+	// Data hex
+	Data string
 }
 
 // ---
 
-// Transaction data
-type Transaction struct {
-	nonce  uint64
-	signer *signer.Signer
-	ser    *serializer.Serializer
-}
+type payloadWriter func(s *serializer.Serializer) string
 
-// Construct transaction
-func (t *Transaction) Construct() (txhash string, txdata string, err error) {
+func construct(signer *signer.Signer, nonce uint64, write payloadWriter) (*Transaction, error) {
 
-	txhash = ""
-	txdata = ""
-	err = nil
+	ser := serializer.NewSerializer()
 
-	payload, err := t.ser.Data()
+	// write nonce
+	ser.PutUint64(nonce)
+
+	// write payload
+	txname := write(ser)
+
+	// get payload
+	payload, err := ser.Data()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	// make payload digest
 	hasher := sha3.New256()
 	_, err = hasher.Write(payload)
 	if err != nil {
-		return
+		return nil, err
 	}
 	digest := hasher.Sum(nil)
 
 	// sign digest
-	signature := t.signer.Sign(digest)
+	signature := signer.Sign(digest)
 
 	// signature
-	t.ser.
+	ser.
 		PutByte(1).         // append a byte - "signed bit"
 		PutBytes(signature) // signature
 
 	// hex of txdata
-	txdata, err = t.ser.Hex()
+	txdata, err := ser.Hex()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	// transaction hash
-	txhash, err = PackHash(t.signer.PublicKey(), t.nonce)
+	txhash, err := PackHash(signer.PublicKey(), nonce)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	return
+	return &Transaction{
+		Name:   txname,
+		Nonce:  nonce,
+		Hash:   txhash,
+		Data:   txdata,
+		Signer: sumus.Pack58(signer.PublicKey()),
+		Digest: sumus.Pack58(digest),
+	}, nil
 }
 
 // ---
 
 // RegisterNode transaction
-func RegisterNode(signer *signer.Signer, nonce uint64, nodename string) (string, string, error) {
+func RegisterNode(signer *signer.Signer, nonce uint64, address string) (*Transaction, error) {
 
-	tx := New(signer, nonce)
-
-	// payload
-	tx.ser.PutBytes(signer.PublicKey()) // public key
-	tx.ser.PutString64(nodename)        // node name as 256 bit
-
-	return tx.Construct()
+	return construct(signer, nonce, func(ser *serializer.Serializer) string {
+		ser.PutBytes(signer.PublicKey()) // public key
+		ser.PutString64(address)         // node address
+		return TxRegisterNode
+	})
 }
 
 // UnregisterNode transaction
-func UnregisterNode(signer *signer.Signer, nonce uint64) (string, string, error) {
+func UnregisterNode(signer *signer.Signer, nonce uint64) (*Transaction, error) {
 
-	tx := New(signer, nonce)
-
-	// payload
-	tx.ser.PutBytes(signer.PublicKey()) // public key
-
-	return tx.Construct()
+	return construct(signer, nonce, func(ser *serializer.Serializer) string {
+		ser.PutBytes(signer.PublicKey()) // public key
+		return TxUnregisterNode
+	})
 }
 
 // TransferAsset transaction
-func TransferAsset(signer *signer.Signer, nonce uint64, address []byte, token sumus.Token, am *amount.Amount) (string, string, error) {
+func TransferAsset(signer *signer.Signer, nonce uint64, address []byte, token sumus.Token, am *amount.Amount) (*Transaction, error) {
 
 	if address == nil || len(address) != 32 {
-		return "", "", fmt.Errorf("Destination address is invalid")
+		return nil, errors.New("Destination address is invalid")
 	}
 
-	tx := New(signer, nonce)
-
-	// payload
-	tx.ser.PutUint16(uint16(token))     // token
-	tx.ser.PutBytes(signer.PublicKey()) // public key
-	tx.ser.PutBytes(address)            // address / public key
-	tx.ser.PutAmount(am)                // amount
-
-	return tx.Construct()
+	return construct(signer, nonce, func(ser *serializer.Serializer) string {
+		ser.PutUint16(uint16(token))     // token
+		ser.PutBytes(signer.PublicKey()) // public key
+		ser.PutBytes(address)            // address / public key
+		ser.PutAmount(am)                // amount
+		return TxTransferAsset
+	})
 }
 
 // UserData transaction
-func UserData(signer *signer.Signer, nonce uint64, data []byte) (string, string, error) {
+func UserData(signer *signer.Signer, nonce uint64, data []byte) (*Transaction, error) {
 
 	if data == nil {
-		return "", "", fmt.Errorf("Data is empty")
+		return nil, errors.New("Data is empty")
 	}
 
-	tx := New(signer, nonce)
-
-	// payload
-	tx.ser.PutBytes(signer.PublicKey()) // public key
-	tx.ser.PutUint32(uint32(len(data))) // data size
-	tx.ser.PutBytes(data)               // data bytes
-
-	return tx.Construct()
+	return construct(signer, nonce, func(ser *serializer.Serializer) string {
+		ser.PutBytes(signer.PublicKey()) // public key
+		ser.PutUint32(uint32(len(data))) // data size
+		ser.PutBytes(data)               // data bytes
+		return TxUserData
+	})
 }

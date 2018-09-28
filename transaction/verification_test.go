@@ -25,12 +25,12 @@ func TestTransferAssetValidation(t *testing.T) {
 	dstpk, _ := sumus.Unpack58("FhM2u3UMtexZ3TU57G6d9iDpcmynBSpzmTZq6YaMPeA6DHFdEht3jcZUDpXyVbXGoXoWiYB9z8QVKjGhZuKCqMGYZE2P6")
 	dst, _ := signer.NewSignerFromPK(dstpk)
 
-	_, txHex, err := TransferAsset(src, nonce, dst.PublicKey(), token, tokenAmount)
+	tx, err := TransferAsset(src, nonce, dst.PublicKey(), token, tokenAmount)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	txBytes, _ := hex.DecodeString(txHex)
+	txBytes, _ := hex.DecodeString(tx.Data)
 
 	// ---
 
@@ -81,7 +81,7 @@ func TestTransferAssetValidation(t *testing.T) {
 		t.Fatal("Failed to read payload")
 	}
 
-	if tNonce != nonce+1 {
+	if tNonce != nonce {
 		t.Fatal("Invalid nonce")
 	}
 	if tToken != uint16(token) {

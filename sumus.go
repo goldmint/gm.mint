@@ -7,6 +7,21 @@ import (
 	"github.com/mr-tron/base58/base58"
 )
 
+// UnpackAddress58 from string
+func UnpackAddress58(data string) ([]byte, error) {
+	b, err := base58.Decode(data)
+	if err == nil && len(b) == 36 {
+		dat := b[:len(b)-4]
+		crc := b[len(b)-4:]
+		ok := crc32.ChecksumIEEE(dat) == (uint32(crc[0]) | uint32(crc[1])<<8 | uint32(crc[2])<<16 | uint32(crc[3])<<24)
+		if ok {
+			return dat, nil
+		}
+		return nil, fmt.Errorf("Invalid checksum")
+	}
+	return nil, fmt.Errorf("Invalid address")
+}
+
 // Unpack58 from string
 func Unpack58(data string) ([]byte, error) {
 	b, err := base58.Decode(data)

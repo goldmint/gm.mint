@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/void616/gm-sumus-lib/amount"
+	"github.com/void616/gm-sumus-lib/types/amount"
 )
 
 // NewDeserializer instance

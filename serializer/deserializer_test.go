@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/void616/gm-sumus-lib/amount"
+	"github.com/void616/gm-sumus-lib/types/amount"
 )
 
 func TestDerializer(t *testing.T) {

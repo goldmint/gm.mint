@@ -6,15 +6,16 @@ import (
 	"testing"
 
 	sumus "github.com/void616/gm-sumus-lib"
-	"github.com/void616/gm-sumus-lib/amount"
 	"github.com/void616/gm-sumus-lib/serializer"
 	"github.com/void616/gm-sumus-lib/signer"
+	"github.com/void616/gm-sumus-lib/types"
+	"github.com/void616/gm-sumus-lib/types/amount"
 )
 
-func TestTransferAssetValidation(t *testing.T) {
+func TestTransferAssetTransactionVerification(t *testing.T) {
 
 	nonce := uint64(2)
-	token := sumus.TokenMNT
+	token := types.TokenMNT
 	tokenAmount := amount.NewFloatString("123.666")
 
 	// ---

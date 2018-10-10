@@ -1,4 +1,4 @@
-package sumus
+package types
 
 import (
 	"fmt"
@@ -15,36 +15,35 @@ const (
 	TokenGOLD
 )
 
+// TokenToString definition
+var TokenToString = map[Token]string{
+	TokenMNT:  "MNT",
+	TokenGOLD: "GOLD",
+}
+
 // String representation
 func (t Token) String() string {
-	switch t {
-	case TokenMNT:
-		return "MNT"
-	case TokenGOLD:
-		return "GOLD"
+	ret, ok := TokenToString[t]
+	if !ok {
+		return ""
 	}
-	return ""
+	return ret
 }
 
 // ParseToken from string
 func ParseToken(s string) (Token, error) {
-	s = strings.ToLower(s)
-	switch s {
+	ls := strings.ToLower(s)
+	switch ls {
 	case "0", "utility", "mnt", "mint":
 		return TokenMNT, nil
 	case "1", "commodity", "gold":
 		return TokenGOLD, nil
 	}
-	return 0, fmt.Errorf("Unknown token `%v`", s)
+	return 0, fmt.Errorf("Unknown token name `%v`", s)
 }
 
-// ToToken from uint16
-func ToToken(u uint16) (Token, error) {
-	switch u {
-	case 0:
-		return TokenMNT, nil
-	case 1:
-		return TokenGOLD, nil
-	}
-	return 0, fmt.Errorf("Unknown token `%v`", u)
+// ValidToken as uint16
+func ValidToken(u uint16) bool {
+	_, ok := TokenToString[Token(u)]
+	return ok
 }

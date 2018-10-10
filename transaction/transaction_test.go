@@ -4,8 +4,9 @@ import (
 	"testing"
 
 	"github.com/void616/gm-sumus-lib"
-	"github.com/void616/gm-sumus-lib/amount"
 	"github.com/void616/gm-sumus-lib/signer"
+	"github.com/void616/gm-sumus-lib/types"
+	"github.com/void616/gm-sumus-lib/types/amount"
 )
 
 func TestRegisterNode(t *testing.T) {
@@ -53,7 +54,7 @@ func TestTransferAsset(t *testing.T) {
 	dstpk, _ := sumus.Unpack58("FhM2u3UMtexZ3TU57G6d9iDpcmynBSpzmTZq6YaMPeA6DHFdEht3jcZUDpXyVbXGoXoWiYB9z8QVKjGhZuKCqMGYZE2P6")
 	dst, _ := signer.NewSignerFromPK(dstpk)
 
-	tx, err := TransferAsset(src, 3, dst.PublicKey(), 0, amount.NewFloatString("1000"))
+	tx, err := TransferAsset(src, 3, dst.PublicKey(), types.TokenMNT, amount.NewFloatString("1000"))
 	if err != nil {
 		t.Fatal(err)
 	}

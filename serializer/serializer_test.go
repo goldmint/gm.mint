@@ -3,7 +3,7 @@ package serializer
 import (
 	"testing"
 
-	"github.com/void616/gm-sumus-lib/amount"
+	"github.com/void616/gm-sumus-lib/types/amount"
 )
 
 func TestSerializer_PutString64(t *testing.T) {

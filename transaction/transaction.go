@@ -4,23 +4,12 @@ import (
 	"errors"
 
 	"github.com/void616/gm-sumus-lib"
-	"github.com/void616/gm-sumus-lib/amount"
 	"github.com/void616/gm-sumus-lib/serializer"
 	"github.com/void616/gm-sumus-lib/signer"
+	"github.com/void616/gm-sumus-lib/types"
+	"github.com/void616/gm-sumus-lib/types/amount"
 	"golang.org/x/crypto/sha3"
 )
-
-// TxTransferAsset is token transfering transaction
-const TxTransferAsset = "TransferAssetsTransaction"
-
-// TxRegisterNode node registration transaction
-const TxRegisterNode = "RegisterNodeTransaction"
-
-// TxUnregisterNode node registration transaction
-const TxUnregisterNode = "UnregisterNodeTransaction"
-
-// TxUserData is custom user transaction
-const TxUserData = "UserDataTransaction"
 
 // Transaction data
 type Transaction struct {
@@ -40,7 +29,7 @@ type Transaction struct {
 
 // ---
 
-type payloadWriter func(s *serializer.Serializer) string
+type payloadWriter func(s *serializer.Serializer) types.Transaction
 
 func construct(signer *signer.Signer, nonce uint64, write payloadWriter) (*Transaction, error) {
 
@@ -50,7 +39,7 @@ func construct(signer *signer.Signer, nonce uint64, write payloadWriter) (*Trans
 	ser.PutUint64(nonce)
 
 	// write payload
-	txname := write(ser)
+	txtype := write(ser)
 
 	// get payload
 	payload, err := ser.Data()
@@ -87,7 +76,7 @@ func construct(signer *signer.Signer, nonce uint64, write payloadWriter) (*Trans
 	}
 
 	return &Transaction{
-		Name:   txname,
+		Name:   txtype.String(),
 		Nonce:  nonce,
 		Hash:   txhash,
 		Data:   txdata,
@@ -101,35 +90,35 @@ func construct(signer *signer.Signer, nonce uint64, write payloadWriter) (*Trans
 // RegisterNode transaction
 func RegisterNode(signer *signer.Signer, nonce uint64, address string) (*Transaction, error) {
 
-	return construct(signer, nonce, func(ser *serializer.Serializer) string {
-		ser.PutBytes(signer.PublicKey()) // public key
+	return construct(signer, nonce, func(ser *serializer.Serializer) types.Transaction {
+		ser.PutBytes(signer.PublicKey()) // signer public key
 		ser.PutString64(address)         // node address
-		return TxRegisterNode
+		return types.TransactionRegisterNode
 	})
 }
 
 // UnregisterNode transaction
 func UnregisterNode(signer *signer.Signer, nonce uint64) (*Transaction, error) {
 
-	return construct(signer, nonce, func(ser *serializer.Serializer) string {
-		ser.PutBytes(signer.PublicKey()) // public key
-		return TxUnregisterNode
+	return construct(signer, nonce, func(ser *serializer.Serializer) types.Transaction {
+		ser.PutBytes(signer.PublicKey()) // signer public key
+		return types.TransactionUnregisterNode
 	})
 }
 
 // TransferAsset transaction
-func TransferAsset(signer *signer.Signer, nonce uint64, address []byte, token sumus.Token, am *amount.Amount) (*Transaction, error) {
+func TransferAsset(signer *signer.Signer, nonce uint64, address []byte, token types.Token, am *amount.Amount) (*Transaction, error) {
 
 	if address == nil || len(address) != 32 {
 		return nil, errors.New("Destination address is invalid")
 	}
 
-	return construct(signer, nonce, func(ser *serializer.Serializer) string {
+	return construct(signer, nonce, func(ser *serializer.Serializer) types.Transaction {
 		ser.PutUint16(uint16(token))     // token
-		ser.PutBytes(signer.PublicKey()) // public key
+		ser.PutBytes(signer.PublicKey()) // signer public key
 		ser.PutBytes(address)            // address / public key
 		ser.PutAmount(am)                // amount
-		return TxTransferAsset
+		return types.TransactionTransferAssets
 	})
 }
 
@@ -140,10 +129,40 @@ func UserData(signer *signer.Signer, nonce uint64, data []byte) (*Transaction, e
 		return nil, errors.New("Data is empty")
 	}
 
-	return construct(signer, nonce, func(ser *serializer.Serializer) string {
-		ser.PutBytes(signer.PublicKey()) // public key
+	return construct(signer, nonce, func(ser *serializer.Serializer) types.Transaction {
+		ser.PutBytes(signer.PublicKey()) // signer public key
 		ser.PutUint32(uint32(len(data))) // data size
 		ser.PutBytes(data)               // data bytes
-		return TxUserData
+		return types.TransactionUserData
+	})
+}
+
+// RegisterSysWallet transaction
+func RegisterSysWallet(signer *signer.Signer, nonce uint64, address []byte, tag types.WalletTag) (*Transaction, error) {
+
+	if address == nil || len(address) != 32 {
+		return nil, errors.New("Destination address is invalid")
+	}
+
+	return construct(signer, nonce, func(ser *serializer.Serializer) types.Transaction {
+		ser.PutBytes(signer.PublicKey()) // signer public key
+		ser.PutBytes(address)            // address / public key
+		ser.PutUint16(uint16(tag))       // tag
+		return types.TransactionRegisterSystemWallet
+	})
+}
+
+// UnregisterSysWallet transaction
+func UnregisterSysWallet(signer *signer.Signer, nonce uint64, address []byte, tag types.WalletTag) (*Transaction, error) {
+
+	if address == nil || len(address) != 32 {
+		return nil, errors.New("Destination address is invalid")
+	}
+
+	return construct(signer, nonce, func(ser *serializer.Serializer) types.Transaction {
+		ser.PutBytes(signer.PublicKey()) // signer public key
+		ser.PutBytes(address)            // address / public key
+		ser.PutUint16(uint16(tag))       // tag
+		return types.TransactionUnregisterSystemWallet
 	})
 }

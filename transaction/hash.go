@@ -8,18 +8,18 @@ import (
 )
 
 // PackHash for specific addr/nonce
-func PackHash(addr []byte, nonce uint64) (string, error) {
+func PackHash(addr []byte, nonce uint64) (string, []byte, error) {
 	if addr == nil || len(addr) != 32 {
-		return "", fmt.Errorf("Address should be 32 bytes length")
+		return "", nil, fmt.Errorf("Address should be 32 bytes length")
 	}
 	ser := serializer.NewSerializer()
 	ser.PutBytes(addr)
 	ser.PutUint64(nonce)
 	b, err := ser.Data()
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	return sumus.Pack58(b), nil
+	return sumus.Pack58(b), b, nil
 }
 
 // UnpackHash and get addr/nonce

@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"bytes"
-	"encoding/hex"
 	"testing"
 
 	sumus "github.com/void616/gm-sumus-lib"
@@ -21,17 +20,21 @@ func TestTransferAssetTransactionVerification(t *testing.T) {
 	// ---
 
 	srcpk, _ := sumus.Unpack58("TBzyWv8Dga5aN4Hai2nFTwyTXvDJKkJhq8HMDPC9zqTWLSTLo4jFFKKnVS52a1kp7YJdm2b8HrR2Buk9PqyD1DwhxUzsJ")
-	src, _ := signer.NewSignerFromPK(srcpk)
+	src, _ := signer.FromPK(srcpk)
 
 	dstpk, _ := sumus.Unpack58("FhM2u3UMtexZ3TU57G6d9iDpcmynBSpzmTZq6YaMPeA6DHFdEht3jcZUDpXyVbXGoXoWiYB9z8QVKjGhZuKCqMGYZE2P6")
-	dst, _ := signer.NewSignerFromPK(dstpk)
+	dst, _ := signer.FromPK(dstpk)
 
-	tx, err := TransferAsset(src, nonce, dst.PublicKey(), token, tokenAmount)
+	tx, err := (&TransferAsset{
+		Address: dst.PublicKey(),
+		Token:   token,
+		Amount:  tokenAmount,
+	}).Construct(src, nonce)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	txBytes, _ := hex.DecodeString(tx.Data)
+	txBytes := tx.Data
 
 	// ---
 
@@ -59,7 +62,7 @@ func TestTransferAssetTransactionVerification(t *testing.T) {
 		t.Fatal("Is not signed")
 	}
 
-	// check if signed
+	// verify if signed
 	err = Verify(src.PublicKey(), txPayload, tSignature)
 	if err != nil {
 		t.Fatal(err, "Failed to verify signature")

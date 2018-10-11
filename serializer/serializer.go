@@ -140,8 +140,6 @@ func (s *Serializer) PutString64(v string) *Serializer {
 // PutAmount ...
 func (s *Serializer) PutAmount(v *amount.Amount) *Serializer {
 
-	// mein Gott, wtf..
-
 	// must be even
 	const imax = 10
 	const fmax = 18
@@ -162,7 +160,7 @@ func (s *Serializer) PutAmount(v *amount.Amount) *Serializer {
 
 	// fract: get it with padding zeros
 	if s.err == nil {
-		b, err := flipAmountStringLikeAShit(v.Fraction(fmax))
+		b, err := flipAmountString(v.Fraction(fmax))
 		if err != nil {
 			s.err = err
 		} else {
@@ -172,7 +170,7 @@ func (s *Serializer) PutAmount(v *amount.Amount) *Serializer {
 
 	// integer: get it with padding zeros
 	if s.err == nil {
-		b, err := flipAmountStringLikeAShit(v.Integer(imax))
+		b, err := flipAmountString(v.Integer(imax))
 		if err != nil {
 			s.err = err
 		} else {
@@ -184,7 +182,7 @@ func (s *Serializer) PutAmount(v *amount.Amount) *Serializer {
 }
 
 // Convert string into some kind of shit: "1234...5678" => [0x78 0x56 .. 0x34 0x12]
-func flipAmountStringLikeAShit(s string) ([]byte, error) {
+func flipAmountString(s string) ([]byte, error) {
 	if (len(s) % 2) != 0 {
 		return nil, fmt.Errorf("Passed string length must be even, got %v", len(s))
 	}

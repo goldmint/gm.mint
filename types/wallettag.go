@@ -5,11 +5,11 @@ import (
 )
 
 // WalletTag in Sumus blockchain
-type WalletTag uint16
+type WalletTag uint8
 
 const (
 	// WalletTagNode is node wallet
-	WalletTagNode WalletTag = iota
+	WalletTagNode WalletTag = iota + 1
 	// WalletTagGenesisNode is node wallet (TODO: clarify)
 	WalletTagGenesisNode
 	// WalletTagSupervisor is controller wallet who can tag other wallets
@@ -51,8 +51,8 @@ func ParseWalletTag(s string) (WalletTag, error) {
 	return 0, fmt.Errorf("Unknown wallet tag name `%v`", s)
 }
 
-// ValidWalletTag as uint16
-func ValidWalletTag(u uint16) bool {
+// ValidWalletTag as uint8
+func ValidWalletTag(u uint8) bool {
 	_, ok := WalletTagToString[WalletTag(u)]
 	return ok
 }

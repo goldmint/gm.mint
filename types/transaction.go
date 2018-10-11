@@ -9,19 +9,19 @@ type Transaction uint16
 
 const (
 	// TransactionRegisterNode registers a new node
-	TransactionRegisterNode Transaction = iota
+	TransactionRegisterNode Transaction = 1
 	// TransactionUnregisterNode unregisters existing node
-	TransactionUnregisterNode
+	TransactionUnregisterNode Transaction = 2
 	// TransactionTransferAssets sends token between wallets
-	TransactionTransferAssets
+	TransactionTransferAssets Transaction = 10
 	// TransactionRegisterSystemWallet registers system wallet
-	TransactionRegisterSystemWallet
+	TransactionRegisterSystemWallet Transaction = 3
 	// TransactionUnregisterSystemWallet unregisters system wallet
-	TransactionUnregisterSystemWallet
+	TransactionUnregisterSystemWallet Transaction = 4
 	// TransactionUserData contains custom payload
-	TransactionUserData
-	// TransactionDistributionFee does the magic
-	TransactionDistributionFee
+	TransactionUserData Transaction = 7
+	// TransactionDistributionFee sends block fee to owner
+	TransactionDistributionFee Transaction = 11
 )
 
 // TransactionToString definition

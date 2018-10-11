@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"math/big"
 
 	"github.com/void616/gm-sumus-lib/types/amount"
@@ -12,14 +13,22 @@ import (
 // NewDeserializer instance
 func NewDeserializer(data []byte) *Deserializer {
 	return &Deserializer{
-		buf: bytes.NewBuffer(data),
+		src: bytes.NewBuffer(data),
+		err: nil,
+	}
+}
+
+// NewStreamDeserializer instance
+func NewStreamDeserializer(r io.Reader) *Deserializer {
+	return &Deserializer{
+		src: r,
 		err: nil,
 	}
 }
 
 // Deserializer data
 type Deserializer struct {
-	buf *bytes.Buffer
+	src io.Reader
 	err error
 }
 
@@ -30,27 +39,20 @@ func (s *Deserializer) Error() error {
 	return s.err
 }
 
-// ---
-
-// GetByte ...
-func (s *Deserializer) GetByte() byte {
-	if s.err == nil {
-		v, err := s.buf.ReadByte()
-		if err == nil {
-			return v
-		}
-		s.err = err
-	}
-	return byte(0)
+// Source stream
+func (s *Deserializer) Source() io.Reader {
+	return s.src
 }
 
+// ---
+
 // GetBytes ...
-func (s *Deserializer) GetBytes(n int) []byte {
+func (s *Deserializer) GetBytes(n uint32) []byte {
 	if s.err == nil {
 		v := make([]byte, n)
-		cnt, err := s.buf.Read(v)
+		cnt, err := s.src.Read(v)
 		if err == nil {
-			if cnt == n {
+			if uint32(cnt) == n {
 				return v
 			}
 			s.err = fmt.Errorf("Didn't read specified amount of bytes. Got %v, expected %v", cnt, n)
@@ -59,6 +61,17 @@ func (s *Deserializer) GetBytes(n int) []byte {
 		}
 	}
 	return nil
+}
+
+// GetByte ...
+func (s *Deserializer) GetByte() byte {
+	if s.err == nil {
+		b := s.GetBytes(1)
+		if b != nil {
+			return b[0]
+		}
+	}
+	return byte(0)
 }
 
 // GetUint16 ...
@@ -92,6 +105,17 @@ func (s *Deserializer) GetUint64() uint64 {
 		}
 	}
 	return uint64(0)
+}
+
+// GetUint256 ...
+func (s *Deserializer) GetUint256() *big.Int {
+	if s.err == nil {
+		b := s.GetBytes(32)
+		if b != nil {
+			return s.shiftInt(b)
+		}
+	}
+	return big.NewInt(0)
 }
 
 // GetString64 ...
@@ -141,7 +165,7 @@ func (s *Deserializer) GetAmount() *amount.Amount {
 		// unflip frag part
 		strFrag := ""
 		if s.err == nil {
-			strFrag, err = unflipAmountStringLikeAShit(fragPart)
+			strFrag, err = unflipAmountString(fragPart)
 			if err != nil {
 				s.err = err
 			}
@@ -150,7 +174,7 @@ func (s *Deserializer) GetAmount() *amount.Amount {
 		// unflip int part
 		strInt := ""
 		if s.err == nil {
-			strInt, err = unflipAmountStringLikeAShit(intPart)
+			strInt, err = unflipAmountString(intPart)
 			if err != nil {
 				s.err = err
 			}
@@ -182,7 +206,7 @@ func (s *Deserializer) shiftInt(b []byte) *big.Int {
 }
 
 // Convert some kind of a shit into string: [0x78 0x56 .. 0x34 0x12] => "1234...5678"
-func unflipAmountStringLikeAShit(b []byte) (string, error) {
+func unflipAmountString(b []byte) (string, error) {
 	if b == nil || len(b) == 0 {
 		return "", fmt.Errorf("Buffer is null or empty")
 	}

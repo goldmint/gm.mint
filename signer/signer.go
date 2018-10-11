@@ -6,8 +6,8 @@ import (
 	"github.com/void616/gm-sumus-lib/signer/ed25519"
 )
 
-// NewSigner made from random keypair
-func NewSigner() (*Signer, error) {
+// New made from random keypair
+func New() (*Signer, error) {
 
 	// generate pk
 	_, pk, err := ed25519.GenerateKey(nil)
@@ -25,8 +25,8 @@ func NewSigner() (*Signer, error) {
 	}, nil
 }
 
-// NewSignerFromPK makes keypair from prehashed seed/PK
-func NewSignerFromPK(b []byte) (*Signer, error) {
+// FromPK makes keypair from prehashed private key
+func FromPK(b []byte) (*Signer, error) {
 
 	// check pk size
 	if len(b) != 64 {

@@ -18,6 +18,13 @@ func New() *Amount {
 	}
 }
 
+// NewAmount copy
+func NewAmount(a *Amount) *Amount {
+	return &Amount{
+		Value: big.NewInt(0).Set(a.Value),
+	}
+}
+
 // NewInteger amount: 100 => 100.000000000000000000
 func NewInteger(i int64) *Amount {
 	v := big.NewInt(0).

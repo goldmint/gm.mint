@@ -109,26 +109,3 @@ func Parse(r io.Reader, cbkHeader CbkHeader, cbkTransaction CbkTransaction) erro
 
 	return nil
 }
-
-// // ReadTransaction data
-// func ReadTransaction(r io.Reader) (types.Transaction, []byte, error) {
-
-// 	d := serializer.NewStreamDeserializer(r)
-
-// 	txCode := d.GetUint16()
-// 	if err := d.Error(); err != nil {
-// 		return types.Transaction(0), nil, err
-// 	}
-
-// 	if !types.ValidTransaction(txCode) {
-// 		return types.Transaction(0), nil, fmt.Errorf("Unknown transaction with code `%v`", txCode)
-// 	}
-// 	txType := types.Transaction(txCode)
-
-// 	txBytes = d.GetBytes(1)
-// 	if err := d.Error(); err != nil {
-// 		return types.Transaction(0), nil, err
-// 	}
-
-// 	return txType, txBytes, nil
-// }

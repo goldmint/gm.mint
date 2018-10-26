@@ -15,8 +15,6 @@ import (
 
 // SignedTransaction data
 type SignedTransaction struct {
-	// Hash, 40b
-	Hash []byte
 	// Digest, 32b
 	Digest []byte
 	// Data of the transaction
@@ -31,8 +29,6 @@ type ParsedTransaction struct {
 	From []byte
 	// Nonce
 	Nonce uint64
-	// Hash, 40b
-	Hash []byte
 	// Digest, 32b
 	Digest []byte
 	// Signature, 64b
@@ -83,14 +79,7 @@ func construct(signer *signer.Signer, nonce uint64, write payloadWriter) (*Signe
 		return nil, err
 	}
 
-	// transaction hash
-	_, txhash, err := PackHash(signer.PublicKey(), nonce)
-	if err != nil {
-		return nil, err
-	}
-
 	return &SignedTransaction{
-		Hash:      txhash,
 		Data:      txdata,
 		Digest:    txdigest,
 		Signature: txsignature,
@@ -104,6 +93,7 @@ type payloadReader func(d *serializer.Deserializer) ([]byte, error)
 func parse(r io.Reader, read payloadReader) (*ParsedTransaction, error) {
 
 	digestWriter := bytes.NewBuffer(make([]byte, 256))
+	digestWriter.Reset()
 	des := serializer.NewStreamDeserializer(io.TeeReader(r, digestWriter))
 
 	// read nonce
@@ -152,16 +142,9 @@ func parse(r io.Reader, read payloadReader) (*ParsedTransaction, error) {
 
 	// TODO: verify optionally
 
-	// make a hash
-	_, txhash, err := PackHash(txsigner, txnonce)
-	if err != nil {
-		return nil, err
-	}
-
 	return &ParsedTransaction{
 		From:      txsigner,
 		Nonce:     txnonce,
-		Hash:      txhash,
 		Digest:    txdigest,
 		Signature: txsignature,
 	}, nil

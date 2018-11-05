@@ -141,7 +141,7 @@ func (s *Serializer) PutString64(v string) *Serializer {
 func (s *Serializer) PutAmount(v *amount.Amount) *Serializer {
 
 	// must be even
-	const imax = 10
+	const imax = 12
 	const fmax = 18
 
 	// limit for integer part

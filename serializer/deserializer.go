@@ -142,7 +142,7 @@ func (s *Deserializer) GetString64() string {
 func (s *Deserializer) GetAmount() *amount.Amount {
 
 	// must be even
-	const imax = 10
+	const imax = 12
 	const fmax = 18
 
 	if s.err == nil {

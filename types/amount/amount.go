@@ -11,6 +11,12 @@ import (
 // Precision of amount
 const Precision = 18
 
+func init() {
+	if Precision < 6 {
+		panic("Precision < 6")
+	}
+}
+
 // New amount
 func New() *Amount {
 	return &Amount{
@@ -90,6 +96,20 @@ func (a *Amount) String() string {
 	abs := big.NewInt(0).Abs(a.Value)
 	ret := fmt.Sprintf(fmt.Sprintf("%%0%ds", Precision+1), abs.Text(10))
 	return fmt.Sprintf("%s%s.%s", sign, ret[:len(ret)-Precision], ret[len(ret)-Precision:])
+}
+
+// Float64 approximation (6 decimal places)
+func (a *Amount) Float64() float64 {
+	x := new(big.Int).Abs(a.Value)
+	x = new(big.Int).Div(x, new(big.Int).Exp(big.NewInt(10), big.NewInt(Precision-6), nil))
+	if x.IsInt64() {
+		ret := float64(x.Int64()) / 1000000.0
+		if a.IsNeg() {
+			return -ret
+		}
+		return ret
+	}
+	return 0
 }
 
 // IsNeg value

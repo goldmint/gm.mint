@@ -2,6 +2,7 @@ package amount
 
 import (
 	"encoding/json"
+	"math"
 	"math/big"
 	"testing"
 )
@@ -163,5 +164,26 @@ func TestAmount_ToFromJson(t *testing.T) {
 
 	if tst.Z.Value.Cmp(tst2.Z.Value) != 0 {
 		t.Fatal("z1 != z2")
+	}
+}
+
+func TestAmount_Float64(t *testing.T) {
+	tests := []struct {
+		a    string
+		want float64
+	}{
+		{"1.0000011", 1.000001},
+		{"1234.0000019", 1234.000001},
+		{"-1234.0000019", -1234.000001},
+		{"123123123123.123123", 123123123123.123123},
+		{"123123123123.1231231", 123123123123.12312},
+		{"-123123123123.1231239", -123123123123.12312},
+	}
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			if got := NewFloatString(tt.a).Float64(); got != tt.want {
+				t.Errorf("Amount.Float64() = %v, want %v (diff %v)", got, tt.want, math.Abs(got-tt.want))
+			}
+		})
 	}
 }

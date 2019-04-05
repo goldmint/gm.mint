@@ -3,7 +3,7 @@ package fee
 import (
 	"math/big"
 
-	"github.com/void616/gm-sumus-lib/types/amount"
+	"github.com/void616/gm-sumuslib/amount"
 )
 
 var (

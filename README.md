@@ -1,3 +1,3 @@
-# GM Sumus Low Level Library
+# GM Sumus Lib
 
-Sumus blockchain low levels functions: transaction types, transactions signing, block data etc.
+Sumus blockchain lowlevel methods, transaction types, transactions signing, block data etc.

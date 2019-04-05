@@ -5,7 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/void616/gm-sumus-lib/types/amount"
+	sumuslib "github.com/void616/gm-sumuslib"
+	"github.com/void616/gm-sumuslib/amount"
 )
 
 // NewSerializer instance
@@ -133,6 +134,19 @@ func (s *Serializer) PutString64(v string) *Serializer {
 		b := make([]byte, max)
 		copy(b, []byte(v))
 		return s.PutBytes(b)
+	}
+	return s
+}
+
+// PutPublicKey ...
+func (s *Serializer) PutPublicKey(v sumuslib.PublicKey) *Serializer {
+	if s.err == nil {
+		n, err := s.buf.Write(v[:])
+		if err != nil {
+			s.err = err
+		} else if n != len(v) {
+			s.err = fmt.Errorf("Failed to write bytes. Written %v, expected %v", n, len(v))
+		}
 	}
 	return s
 }

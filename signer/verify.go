@@ -3,11 +3,12 @@ package signer
 import (
 	"fmt"
 
-	"github.com/void616/gm-sumus-lib/signer/ed25519"
+	sumuslib "github.com/void616/gm-sumuslib"
+	"github.com/void616/gm-sumuslib/signer/ed25519"
 )
 
 // Verify a message with a public key of a signer
-func Verify(pub, message, sig []byte) error {
+func Verify(pub sumuslib.PublicKey, message []byte, sig sumuslib.Signature) error {
 
 	// check public key size
 	if len(pub) != ed25519.PublicKeySize {
@@ -25,7 +26,7 @@ func Verify(pub, message, sig []byte) error {
 	}
 
 	// verify
-	if !ed25519.Verify(pub, message, sig) {
+	if !ed25519.Verify(pub[:], message, sig[:]) {
 		return fmt.Errorf("Invalid signature for this message")
 	}
 

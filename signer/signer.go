@@ -3,7 +3,8 @@ package signer
 import (
 	"fmt"
 
-	"github.com/void616/gm-sumus-lib/signer/ed25519"
+	sumuslib "github.com/void616/gm-sumuslib"
+	"github.com/void616/gm-sumuslib/signer/ed25519"
 )
 
 // New made from random keypair
@@ -62,23 +63,25 @@ func (s *Signer) assert() {
 }
 
 // Sign message with a key
-func (s *Signer) Sign(message []byte) []byte {
+func (s *Signer) Sign(message []byte) sumuslib.Signature {
 	s.assert()
-	return ed25519.SignWithPrehashed(s.privateKey, s.publicKey, message)
+	var sig sumuslib.Signature
+	copy(sig[:], ed25519.SignWithPrehashed(s.privateKey, s.publicKey, message))
+	return sig
 }
 
 // PrivateKey of the signer
-func (s *Signer) PrivateKey() []byte {
+func (s *Signer) PrivateKey() sumuslib.PrivateKey {
 	s.assert()
-	var ret [64]byte
-	copy(ret[:], s.privateKey)
-	return ret[:]
+	var k sumuslib.PrivateKey
+	copy(k[:], s.privateKey)
+	return k
 }
 
 // PublicKey of the signer
-func (s *Signer) PublicKey() []byte {
+func (s *Signer) PublicKey() sumuslib.PublicKey {
 	s.assert()
-	var ret [32]byte
-	copy(ret[:], s.publicKey)
-	return ret[:]
+	var k sumuslib.PublicKey
+	copy(k[:], s.publicKey)
+	return k
 }

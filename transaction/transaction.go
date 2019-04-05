@@ -6,33 +6,33 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/void616/gm-sumus-lib/serializer"
-	"github.com/void616/gm-sumus-lib/signer"
-	"github.com/void616/gm-sumus-lib/types"
-	"github.com/void616/gm-sumus-lib/types/amount"
+	sumuslib "github.com/void616/gm-sumuslib"
+	"github.com/void616/gm-sumuslib/amount"
+	"github.com/void616/gm-sumuslib/serializer"
+	"github.com/void616/gm-sumuslib/signer"
 	"golang.org/x/crypto/sha3"
 )
 
 // SignedTransaction data
 type SignedTransaction struct {
 	// Digest, 32b
-	Digest []byte
+	Digest sumuslib.Digest
 	// Data of the transaction
 	Data []byte
 	// Signature, 64b
-	Signature []byte
+	Signature sumuslib.Signature
 }
 
 // ParsedTransaction data
 type ParsedTransaction struct {
 	// From address, 32b
-	From []byte
+	From sumuslib.PublicKey
 	// Nonce
 	Nonce uint64
 	// Digest, 32b
-	Digest []byte
+	Digest sumuslib.Digest
 	// Signature, 64b
-	Signature []byte
+	Signature sumuslib.Signature
 }
 
 // ---
@@ -58,20 +58,23 @@ func construct(signer *signer.Signer, nonce uint64, write payloadWriter) (*Signe
 	}
 
 	// make payload digest
-	hasher := sha3.New256()
-	_, err = hasher.Write(payload)
-	if err != nil {
-		return nil, err
+	var txdigest sumuslib.Digest
+	{
+		hasher := sha3.New256()
+		_, err = hasher.Write(payload)
+		if err != nil {
+			return nil, err
+		}
+		digest := hasher.Sum(nil)
+		copy(txdigest[:], digest)
 	}
-	txdigest := hasher.Sum(nil)
 
 	// sign digest
-	txsignature := signer.Sign(txdigest)
+	txsignature := signer.Sign(txdigest[:])
 
 	// signature
-	ser.
-		PutByte(1).           // append a byte - "signed bit"
-		PutBytes(txsignature) // signature
+	ser.PutByte(1)               // append a byte - "signed bit"
+	ser.PutBytes(txsignature[:]) // signature
 
 	// data
 	txdata, err := ser.Data()
@@ -87,7 +90,7 @@ func construct(signer *signer.Signer, nonce uint64, write payloadWriter) (*Signe
 }
 
 // Callback to parse transaction payload. Wants a signer public key or an error
-type payloadReader func(d *serializer.Deserializer) ([]byte, error)
+type payloadReader func(d *serializer.Deserializer) (sumuslib.PublicKey, error)
 
 // Parse transaction data from bytes
 func parse(r io.Reader, read payloadReader) (*ParsedTransaction, error) {
@@ -103,21 +106,29 @@ func parse(r io.Reader, read payloadReader) (*ParsedTransaction, error) {
 	}
 
 	// read payload, get signer pub key
-	txsigner, rerr := read(des)
-	if err := des.Error(); err != nil {
-		return nil, err
-	}
-	if rerr != nil {
-		return nil, rerr
+	var txsigner sumuslib.PublicKey
+	{
+		pub, rerr := read(des)
+		if err := des.Error(); err != nil {
+			return nil, err
+		}
+		if rerr != nil {
+			return nil, rerr
+		}
+		txsigner = pub
 	}
 
 	// calc the digest
-	hasher := sha3.New256()
-	_, err := hasher.Write(digestWriter.Bytes())
-	if err != nil {
-		return nil, err
+	var txdigest sumuslib.Digest
+	{
+		hasher := sha3.New256()
+		_, err := hasher.Write(digestWriter.Bytes())
+		if err != nil {
+			return nil, err
+		}
+		b := hasher.Sum(nil)
+		copy(txdigest[:], b)
 	}
-	txdigest := hasher.Sum(nil)
 
 	// "signed" byte
 	txsigned := des.GetByte()
@@ -125,18 +136,21 @@ func parse(r io.Reader, read payloadReader) (*ParsedTransaction, error) {
 		return nil, err
 	}
 
-	txsignature := make([]byte, 64)
-	if txsigned != 0 {
-		// signature
-		txsignature = des.GetBytes(64)
-		if err := des.Error(); err != nil {
-			return nil, err
-		}
-	} else {
-		// digest
-		_ = des.GetBytes(32)
-		if err := des.Error(); err != nil {
-			return nil, err
+	var txsignature sumuslib.Signature
+	{
+		if txsigned != 0 {
+			// signature
+			b := des.GetBytes(64)
+			if err := des.Error(); err != nil {
+				return nil, err
+			}
+			copy(txsignature[:], b)
+		} else {
+			// digest
+			_ = des.GetBytes(32)
+			if err := des.Error(); err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -167,16 +181,16 @@ type RegisterNode struct {
 func (t *RegisterNode) Construct(signer *signer.Signer, nonce uint64) (*SignedTransaction, error) {
 
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
-		ser.PutBytes(signer.PublicKey()) // signer public key
-		ser.PutString64(t.NodeAddress)   // node address
+		ser.PutPublicKey(signer.PublicKey()) // signer public key
+		ser.PutString64(t.NodeAddress)       // node address
 	})
 }
 
 // Parse ...
 func (t *RegisterNode) Parse(r io.Reader) (*ParsedTransaction, error) {
 
-	return parse(r, func(des *serializer.Deserializer) ([]byte, error) {
-		ret := des.GetBytes(32)           // signer public key
+	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
+		ret := des.GetPublicKey()         // signer public key
 		t.NodeAddress = des.GetString64() // node address
 		return ret, nil
 	})
@@ -192,15 +206,15 @@ type UnregisterNode struct {
 func (t *UnregisterNode) Construct(signer *signer.Signer, nonce uint64) (*SignedTransaction, error) {
 
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
-		ser.PutBytes(signer.PublicKey()) // signer public key
+		ser.PutPublicKey(signer.PublicKey()) // signer public key
 	})
 }
 
 // Parse ...
 func (t *UnregisterNode) Parse(r io.Reader) (*ParsedTransaction, error) {
 
-	return parse(r, func(des *serializer.Deserializer) ([]byte, error) {
-		ret := des.GetBytes(32) // signer public key
+	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
+		ret := des.GetPublicKey() // signer public key
 		return ret, nil
 	})
 }
@@ -209,40 +223,35 @@ func (t *UnregisterNode) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 // TransferAsset transaction
 type TransferAsset struct {
-	Address []byte
-	Token   types.Token
+	Address sumuslib.PublicKey
+	Token   sumuslib.Token
 	Amount  *amount.Amount
 }
 
 // Construct ...
 func (t *TransferAsset) Construct(signer *signer.Signer, nonce uint64) (*SignedTransaction, error) {
-
-	if t.Address == nil || len(t.Address) != 32 {
-		return nil, errors.New("Destination address is invalid")
-	}
-
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
-		ser.PutUint16(uint16(t.Token))   // token
-		ser.PutBytes(signer.PublicKey()) // signer public key
-		ser.PutBytes(t.Address)          // address / public key
-		ser.PutAmount(t.Amount)          // amount
+		ser.PutUint16(uint16(t.Token))       // token
+		ser.PutPublicKey(signer.PublicKey()) // signer public key
+		ser.PutPublicKey(t.Address)          // address / public key
+		ser.PutAmount(t.Amount)              // amount
 	})
 }
 
 // Parse ...
 func (t *TransferAsset) Parse(r io.Reader) (*ParsedTransaction, error) {
 
-	return parse(r, func(des *serializer.Deserializer) ([]byte, error) {
-		tokenCode := des.GetUint16() // token
-		ret := des.GetBytes(32)      // signer public key
-		t.Address = des.GetBytes(32) // address / public key
-		t.Amount = des.GetAmount()   // amount
+	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
+		tokenCode := des.GetUint16()   // token
+		ret := des.GetPublicKey()      // signer public key
+		t.Address = des.GetPublicKey() // address / public key
+		t.Amount = des.GetAmount()     // amount
 
 		// ensure token is valid
-		if !types.ValidToken(tokenCode) {
-			return nil, fmt.Errorf("Unknown token with code `%v`", tokenCode)
+		if !sumuslib.ValidToken(tokenCode) {
+			return ret, fmt.Errorf("Unknown token with code `%v`", tokenCode)
 		}
-		t.Token = types.Token(tokenCode)
+		t.Token = sumuslib.Token(tokenCode)
 
 		return ret, nil
 	})
@@ -263,17 +272,17 @@ func (t *UserData) Construct(signer *signer.Signer, nonce uint64) (*SignedTransa
 	}
 
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
-		ser.PutBytes(signer.PublicKey())   // signer public key
-		ser.PutUint32(uint32(len(t.Data))) // data size
-		ser.PutBytes(t.Data)               // data bytes
+		ser.PutPublicKey(signer.PublicKey()) // signer public key
+		ser.PutUint32(uint32(len(t.Data)))   // data size
+		ser.PutBytes(t.Data)                 // data bytes
 	})
 }
 
 // Parse ...
 func (t *UserData) Parse(r io.Reader) (*ParsedTransaction, error) {
 
-	return parse(r, func(des *serializer.Deserializer) ([]byte, error) {
-		ret := des.GetBytes(32)     // signer public key
+	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
+		ret := des.GetPublicKey()   // signer public key
 		size := des.GetUint32()     // data size
 		t.Data = des.GetBytes(size) // data bytes
 		return ret, nil
@@ -284,37 +293,32 @@ func (t *UserData) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 // RegisterSysWallet transaction
 type RegisterSysWallet struct {
-	Address []byte
-	Tag     types.WalletTag
+	Address sumuslib.PublicKey
+	Tag     sumuslib.WalletTag
 }
 
 // Construct ...
 func (t *RegisterSysWallet) Construct(signer *signer.Signer, nonce uint64) (*SignedTransaction, error) {
-
-	if t.Address == nil || len(t.Address) != 32 {
-		return nil, errors.New("Destination address is invalid")
-	}
-
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
-		ser.PutBytes(signer.PublicKey()) // signer public key
-		ser.PutBytes(t.Address)          // address / public key
-		ser.PutByte(uint8(t.Tag))        // tag
+		ser.PutPublicKey(signer.PublicKey()) // signer public key
+		ser.PutPublicKey(t.Address)          // address / public key
+		ser.PutByte(uint8(t.Tag))            // tag
 	})
 }
 
 // Parse ...
 func (t *RegisterSysWallet) Parse(r io.Reader) (*ParsedTransaction, error) {
 
-	return parse(r, func(des *serializer.Deserializer) ([]byte, error) {
-		ret := des.GetBytes(32)      // signer public key
-		t.Address = des.GetBytes(32) // address / public key
-		tagCode := des.GetByte()     // tag
+	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
+		ret := des.GetPublicKey()      // signer public key
+		t.Address = des.GetPublicKey() // address / public key
+		tagCode := des.GetByte()       // tag
 
 		// ensure tag is valid
-		if !types.ValidWalletTag(tagCode) {
-			return nil, fmt.Errorf("Unknown wallet tag with code `%v`", tagCode)
+		if !sumuslib.ValidWalletTag(tagCode) {
+			return ret, fmt.Errorf("Unknown wallet tag with code `%v`", tagCode)
 		}
-		t.Tag = types.WalletTag(tagCode)
+		t.Tag = sumuslib.WalletTag(tagCode)
 
 		return ret, nil
 	})
@@ -324,37 +328,32 @@ func (t *RegisterSysWallet) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 // UnregisterSysWallet transaction
 type UnregisterSysWallet struct {
-	Address []byte
-	Tag     types.WalletTag
+	Address sumuslib.PublicKey
+	Tag     sumuslib.WalletTag
 }
 
 // Construct ...
 func (t *UnregisterSysWallet) Construct(signer *signer.Signer, nonce uint64) (*SignedTransaction, error) {
-
-	if t.Address == nil || len(t.Address) != 32 {
-		return nil, errors.New("Destination address is invalid")
-	}
-
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
-		ser.PutBytes(signer.PublicKey()) // signer public key
-		ser.PutBytes(t.Address)          // address / public key
-		ser.PutByte(uint8(t.Tag))        // tag
+		ser.PutPublicKey(signer.PublicKey()) // signer public key
+		ser.PutPublicKey(t.Address)          // address / public key
+		ser.PutByte(uint8(t.Tag))            // tag
 	})
 }
 
 // Parse ...
 func (t *UnregisterSysWallet) Parse(r io.Reader) (*ParsedTransaction, error) {
 
-	return parse(r, func(des *serializer.Deserializer) ([]byte, error) {
-		ret := des.GetBytes(32)      // signer public key
-		t.Address = des.GetBytes(32) // address / public key
-		tagCode := des.GetByte()     // tag
+	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
+		ret := des.GetPublicKey()      // signer public key
+		t.Address = des.GetPublicKey() // address / public key
+		tagCode := des.GetByte()       // tag
 
 		// ensure tag is valid
-		if !types.ValidWalletTag(tagCode) {
-			return nil, fmt.Errorf("Unknown wallet tag with code `%v`", tagCode)
+		if !sumuslib.ValidWalletTag(tagCode) {
+			return ret, fmt.Errorf("Unknown wallet tag with code `%v`", tagCode)
 		}
-		t.Tag = types.WalletTag(tagCode)
+		t.Tag = sumuslib.WalletTag(tagCode)
 
 		return ret, nil
 	})
@@ -364,34 +363,29 @@ func (t *UnregisterSysWallet) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 // DistributionFee transaction
 type DistributionFee struct {
-	OwnerAddress []byte
+	OwnerAddress sumuslib.PublicKey
 	AmountMNT    *amount.Amount
 	AmountGOLD   *amount.Amount
 }
 
 // Construct ...
 func (t *DistributionFee) Construct(signer *signer.Signer, nonce uint64) (*SignedTransaction, error) {
-
-	if t.OwnerAddress == nil || len(t.OwnerAddress) != 32 {
-		return nil, errors.New("Destination address is invalid")
-	}
-
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
-		ser.PutBytes(signer.PublicKey()) // signer public key
-		ser.PutBytes(t.OwnerAddress)     // owner address / public key
-		ser.PutAmount(t.AmountMNT)       // mnt amount
-		ser.PutAmount(t.AmountGOLD)      // gold amount
+		ser.PutPublicKey(signer.PublicKey()) // signer public key
+		ser.PutPublicKey(t.OwnerAddress)     // owner address / public key
+		ser.PutAmount(t.AmountMNT)           // mnt amount
+		ser.PutAmount(t.AmountGOLD)          // gold amount
 	})
 }
 
 // Parse ...
 func (t *DistributionFee) Parse(r io.Reader) (*ParsedTransaction, error) {
 
-	return parse(r, func(des *serializer.Deserializer) ([]byte, error) {
-		ret := des.GetBytes(32)           // signer public key
-		t.OwnerAddress = des.GetBytes(32) // owner address / public key
-		t.AmountMNT = des.GetAmount()     // mnt amount
-		t.AmountGOLD = des.GetAmount()    // gold amount
+	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
+		ret := des.GetPublicKey()           // signer public key
+		t.OwnerAddress = des.GetPublicKey() // owner address / public key
+		t.AmountMNT = des.GetAmount()       // mnt amount
+		t.AmountGOLD = des.GetAmount()      // gold amount
 		return ret, nil
 	})
 }

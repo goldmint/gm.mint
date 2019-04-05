@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/void616/gm-sumus-lib/signer"
-	"github.com/void616/gm-sumus-lib/types"
-	"github.com/void616/gm-sumus-lib/types/amount"
+	sumuslib "github.com/void616/gm-sumuslib"
+	"github.com/void616/gm-sumuslib/amount"
+	"github.com/void616/gm-sumuslib/signer"
 )
 
 func TestConstructParse(t *testing.T) {
@@ -33,7 +33,7 @@ func TestConstructParse(t *testing.T) {
 			"TransferAsset",
 			&TransferAsset{
 				Address: signer.PublicKey(),
-				Token:   types.TokenGOLD,
+				Token:   sumuslib.TokenGOLD,
 				Amount:  amount.NewFloatString("1.666"),
 			},
 		},
@@ -47,14 +47,14 @@ func TestConstructParse(t *testing.T) {
 			"RegisterSysWallet",
 			&RegisterSysWallet{
 				Address: signer.PublicKey(),
-				Tag:     types.WalletTagSupervisor,
+				Tag:     sumuslib.WalletTagSupervisor,
 			},
 		},
 		{
 			"UnregisterSysWallet",
 			&UnregisterSysWallet{
 				Address: signer.PublicKey(),
-				Tag:     types.WalletTagEmission,
+				Tag:     sumuslib.WalletTagEmission,
 			},
 		},
 		{

@@ -7,7 +7,8 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/void616/gm-sumus-lib/types/amount"
+	sumuslib "github.com/void616/gm-sumuslib"
+	"github.com/void616/gm-sumuslib/amount"
 )
 
 // NewDeserializer instance
@@ -136,6 +137,45 @@ func (s *Deserializer) GetString64() string {
 		}
 	}
 	return ""
+}
+
+// GetPublicKey ...
+func (s *Deserializer) GetPublicKey() sumuslib.PublicKey {
+	var pub sumuslib.PublicKey
+
+	if s.err == nil {
+		b := s.GetBytes(uint32(cap(pub)))
+		if b != nil {
+			copy(pub[:], b)
+		}
+	}
+	return pub
+}
+
+// GetDigest ...
+func (s *Deserializer) GetDigest() sumuslib.Digest {
+	var d sumuslib.Digest
+
+	if s.err == nil {
+		b := s.GetBytes(uint32(cap(d)))
+		if b != nil {
+			copy(d[:], b)
+		}
+	}
+	return d
+}
+
+// GetSignature ...
+func (s *Deserializer) GetSignature() sumuslib.Signature {
+	var sig sumuslib.Signature
+
+	if s.err == nil {
+		b := s.GetBytes(uint32(cap(sig)))
+		if b != nil {
+			copy(sig[:], b)
+		}
+	}
+	return sig
 }
 
 // GetAmount ...

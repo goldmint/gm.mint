@@ -3,14 +3,15 @@ package transaction
 import (
 	"fmt"
 
-	"github.com/void616/gm-sumus-lib/signer"
+	sumuslib "github.com/void616/gm-sumuslib"
+	"github.com/void616/gm-sumuslib/signer"
 	"golang.org/x/crypto/sha3"
 )
 
 // Verify transaction payload
-func Verify(address, payload, signature []byte) error {
-	if address == nil || payload == nil || signature == nil {
-		return fmt.Errorf("Null argument specified")
+func Verify(address sumuslib.PublicKey, payload []byte, signature sumuslib.Signature) error {
+	if len(payload) == 0 {
+		return fmt.Errorf("Invalid payload")
 	}
 
 	// make payload digest

@@ -1,4 +1,4 @@
-module github.com/void616/gm-sumus-lib
+module github.com/void616/gm-sumuslib
 
 require (
 	github.com/mr-tron/base58 v1.1.0

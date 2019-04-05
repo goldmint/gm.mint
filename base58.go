@@ -23,20 +23,20 @@ func Unpack58(data string) ([]byte, error) {
 }
 
 // UnpackAddress58 from string
-func UnpackAddress58(data string) ([32]byte, error) {
-	var addr [32]byte
+func UnpackAddress58(data string) (PublicKey, error) {
+	var pub PublicKey
 	b, err := base58.Decode(data)
 	if err == nil && len(b) == 36 {
 		dat := b[:len(b)-4]
 		crc := b[len(b)-4:]
 		ok := crc32.ChecksumIEEE(dat) == (uint32(crc[0]) | uint32(crc[1])<<8 | uint32(crc[2])<<16 | uint32(crc[3])<<24)
 		if ok {
-			copy(addr[:], dat)
-			return addr, nil
+			copy(pub[:], dat)
+			return pub, nil
 		}
-		return addr, fmt.Errorf("Invalid checksum")
+		return pub, fmt.Errorf("Invalid checksum")
 	}
-	return addr, fmt.Errorf("Invalid address")
+	return pub, fmt.Errorf("Invalid address")
 }
 
 // Pack58 packs bytes into base58 with crc

@@ -13,15 +13,15 @@ import (
 type Header struct {
 	// Version of the blockchain
 	Version uint16
-	// PrevBlockDigest, 32 bytes
+	// PrevBlockDigest
 	PrevBlockDigest sumuslib.Digest
-	// MerkleRoot, 32 bytes
+	// MerkleRoot
 	MerkleRoot sumuslib.Digest
 	// Timestamp of the block
 	Timestamp uint64
 	// TransactionsCount in the block
 	TransactionsCount uint16
-	// BlockNumber, 32 bytes
+	// BlockNumber
 	BlockNumber *big.Int
 	// SignersCount
 	SignersCount uint16
@@ -31,9 +31,9 @@ type Header struct {
 
 // Signer data
 type Signer struct {
-	// PublicKey, 32 bytes
+	// PublicKey
 	PublicKey sumuslib.PublicKey
-	// Signature, 64 bytes
+	// Signature
 	Signature sumuslib.Signature
 }
 

@@ -137,24 +137,21 @@ func (a *Amount) Fraction(width uint) string {
 
 // ---
 
-// MarshalJSON ...
+// MarshalJSON impl.
 func (a *Amount) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a.String())
 }
 
-// UnmarshalJSON ...
+// UnmarshalJSON impl.
 func (a *Amount) UnmarshalJSON(b []byte) error {
 	var s string
 	if err := json.Unmarshal(b, &s); err != nil {
 		return err
 	}
-
 	tmp := NewFloatString(s)
 	if tmp == nil {
-		return errors.New("Failed to parse amount from `" + s + "`")
+		return errors.New("failed to parse amount from `" + s + "`")
 	}
-
 	*a = *tmp
-
 	return nil
 }

@@ -1,0 +1,4 @@
+# github.com/mr-tron/base58 v1.1.0
+github.com/mr-tron/base58/base58
+# golang.org/x/crypto v0.0.0-20190123085648-057139ce5d2b
+golang.org/x/crypto/sha3

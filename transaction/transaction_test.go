@@ -34,7 +34,7 @@ func TestConstructParse(t *testing.T) {
 			&TransferAsset{
 				Address: signer.PublicKey(),
 				Token:   sumuslib.TokenGOLD,
-				Amount:  amount.NewFloatString("1.666"),
+				Amount:  amount.MustFromString("1.666"),
 			},
 		},
 		{
@@ -61,8 +61,8 @@ func TestConstructParse(t *testing.T) {
 			"DistributionFee",
 			&DistributionFee{
 				OwnerAddress: signer.PublicKey(),
-				AmountMNT:    amount.NewFloatString("1.666"),
-				AmountGOLD:   amount.NewFloatString("666.1"),
+				AmountMNT:    amount.MustFromString("1.666"),
+				AmountGOLD:   amount.MustFromString("666.1"),
 			},
 		},
 	}

@@ -14,15 +14,15 @@ func TestTransferAssetTransactionVerification(t *testing.T) {
 
 	nonce := uint64(2)
 	token := sumuslib.TokenMNT
-	tokenAmount := amount.NewFloatString("123.666")
+	tokenAmount := amount.MustFromString("123.666")
 
 	// ---
 
 	srcpk, _ := sumuslib.Unpack58("TBzyWv8Dga5aN4Hai2nFTwyTXvDJKkJhq8HMDPC9zqTWLSTLo4jFFKKnVS52a1kp7YJdm2b8HrR2Buk9PqyD1DwhxUzsJ")
-	src, _ := signer.FromPK(srcpk)
+	src, _ := signer.FromBytes(srcpk)
 
 	dstpk, _ := sumuslib.Unpack58("FhM2u3UMtexZ3TU57G6d9iDpcmynBSpzmTZq6YaMPeA6DHFdEht3jcZUDpXyVbXGoXoWiYB9z8QVKjGhZuKCqMGYZE2P6")
-	dst, _ := signer.FromPK(dstpk)
+	dst, _ := signer.FromBytes(dstpk)
 
 	tx, err := (&TransferAsset{
 		Address: dst.PublicKey(),

@@ -15,11 +15,11 @@ func TestDerializer(t *testing.T) {
 	var u64 = uint64(0xDEADBEEF1337C0DE)
 	var str64 = "961D2014E3E93AC701A6A5F25824DB66"
 	var str64Full = "1EF8C0F73B2370D14330C487A70618E0333EAEBA8313EC87131B8F67D964D097"
-	var amo1 = amount.NewFloatString("1234567890.123456789123456789")
-	var amo2 = amount.NewFloatString("-987654321.102030405060708090")
-	var amo3 = amount.NewFloatString("1000")
-	var amo4 = amount.NewFloatString("1")
-	var amo5 = amount.NewFloatString("0")
+	var amo1 = amount.MustFromString("1234567890.123456789123456789")
+	var amo2 = amount.MustFromString("-987654321.102030405060708090")
+	var amo3 = amount.MustFromString("1000")
+	var amo4 = amount.MustFromString("1")
+	var amo5 = amount.MustFromString("0")
 
 	ser := NewSerializer()
 	ser.PutByte(b)

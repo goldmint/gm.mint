@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestDateFromStamp(t *testing.T) {
+func TestDateToStamp(t *testing.T) {
 
 	tests := []struct {
 		name  string
@@ -18,9 +18,9 @@ func TestDateFromStamp(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := DateFromStamp(tt.stamp)
+			got := DateToStamp(tt.stamp)
 			if got.Format("2006-Jan-02 15:04:05") != tt.want {
-				t.Errorf("DateFromStamp() = %v, expected %v", got, tt.want)
+				t.Errorf("DateToStamp() = %v, expected %v", got, tt.want)
 			}
 		})
 	}

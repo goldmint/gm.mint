@@ -45,9 +45,9 @@ func TestGoldFee(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := amount.NewFloatString(tt.gold)
-			m := amount.NewFloatString(tt.mnt)
-			f := amount.NewFloatString(tt.fee)
+			g := amount.MustFromString(tt.gold)
+			m := amount.MustFromString(tt.mnt)
+			f := amount.MustFromString(tt.fee)
 			if got := GoldFee(g, m); got.Value.Cmp(f.Value) != 0 {
 				t.Errorf("GoldFee() = %v, want %v", got.String(), f.String())
 			}

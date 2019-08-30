@@ -9,50 +9,50 @@ import (
 
 func TestAmount_String(t *testing.T) {
 
-	a := NewInteger(1)
+	a := FromInteger(1)
 	if a.String() != "1.000000000000000000" {
 		t.Fatal(a.String())
 	}
 
-	a = NewInteger(123)
+	a = FromInteger(123)
 	if a.String() != "123.000000000000000000" {
 		t.Fatal(a.String())
 	}
 
-	a = NewBig(big.NewInt(123456))
+	a = FromBig(big.NewInt(123456))
 	if a.String() != "0.000000000000123456" {
 		t.Fatal(a.String())
 	}
 
-	a = NewBig(big.NewInt(-666))
+	a = FromBig(big.NewInt(-666))
 	if a.String() != "-0.000000000000000666" {
 		t.Fatal(a.String())
 	}
 
-	a = NewBig(big.NewInt(123456))
-	a.Value = a.Value.Add(a.Value, NewInteger(123456).Value)
+	a = FromBig(big.NewInt(123456))
+	a.Value = a.Value.Add(a.Value, FromInteger(123456).Value)
 	a.Value = a.Value.Neg(a.Value)
 	if a.String() != "-123456.000000000000123456" {
 		t.Fatal(a.String())
 	}
 
-	a = NewFloatString("0.1")
+	a = MustFromString("0.1")
 	if a.String() != "0.100000000000000000" {
 		t.Fatal(a.String())
 	}
 
-	a = NewFloatString("-123456.000000000000123456444")
+	a = MustFromString("-123456.000000000000123456444")
 	if a.String() != "-123456.000000000000123456" {
 		t.Fatal(a.String())
 	}
 
-	a = NewFloatString("-123456.000000000000123456999")
+	a = MustFromString("-123456.000000000000123456999")
 	if a.String() != "-123456.000000000000123457" {
 		t.Fatal(a.String())
 	}
 }
 
-func TestNewBigString(t *testing.T) {
+func TestFromBigString(t *testing.T) {
 	type args struct {
 		s    string
 		base int
@@ -71,8 +71,13 @@ func TestNewBigString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewBigString(tt.args.s, tt.args.base); got.String() != tt.want {
-				t.Errorf("NewBigString() = %v, want %v", got, tt.want)
+			got, err := FromBigString(tt.args.s, tt.args.base)
+			if err != nil {
+				t.Errorf("FromBigString() thrown an error: %v", err)
+				return
+			}
+			if got.String() != tt.want {
+				t.Errorf("FromBigString() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -87,12 +92,12 @@ func TestAmount_Fraction(t *testing.T) {
 		want1  string
 		want2  string
 	}{
-		{"1", NewFloatString("0"), 10, Precision, "0000000000", "000000000000000000"},
-		{"2", NewFloatString("-123.456"), 0, Precision, "123", "456000000000000000"},
-		{"3", NewFloatString("0.000000000000000001"), 0, Precision, "0", "000000000000000001"},
-		{"4", NewFloatString("666"), 0, Precision, "666", "000000000000000000"},
-		{"5", NewFloatString("616.000000000000000000666"), 10, Precision, "0000000616", "000000000000000001"},
-		{"6", NewFloatString("-999999999999999999.111222333444555666444"), 0, Precision, "999999999999999999", "111222333444555666"},
+		{"1", MustFromString("0"), 10, Precision, "0000000000", "000000000000000000"},
+		{"2", MustFromString("-123.456"), 0, Precision, "123", "456000000000000000"},
+		{"3", MustFromString("0.000000000000000001"), 0, Precision, "0", "000000000000000001"},
+		{"4", MustFromString("666"), 0, Precision, "666", "000000000000000000"},
+		{"5", MustFromString("616.000000000000000000666"), 10, Precision, "0000000616", "000000000000000001"},
+		{"6", MustFromString("-999999999999999999.111222333444555666444"), 0, Precision, "999999999999999999", "111222333444555666"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -108,14 +113,14 @@ func TestAmount_Fraction(t *testing.T) {
 
 func TestAmount_ToFromJson(t *testing.T) {
 
-	a := NewFloatString("-987654321987654321.123456789123456789")
+	a := MustFromString("-987654321987654321.123456789123456789")
 
 	jbytes, err := json.Marshal(a)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	b := NewInteger(0)
+	b := FromInteger(0)
 	err = json.Unmarshal(jbytes, b)
 	if err != nil {
 		t.Fatal(err)
@@ -133,9 +138,9 @@ func TestAmount_ToFromJson(t *testing.T) {
 		Z *Amount `json:"z,omitempty"`
 	}
 	tst := Tst{
-		X: NewFloatString("-987654321987654321.123456789123456789"),
+		X: MustFromString("-987654321987654321.123456789123456789"),
 		Y: nil,
-		Z: NewFloatString("666"),
+		Z: MustFromString("666"),
 	}
 
 	jbytes, err = json.Marshal(tst)
@@ -144,9 +149,9 @@ func TestAmount_ToFromJson(t *testing.T) {
 	}
 
 	tst2 := Tst{
-		X: NewInteger(0),
-		Y: NewInteger(0),
-		Z: NewInteger(0),
+		X: FromInteger(0),
+		Y: FromInteger(0),
+		Z: FromInteger(0),
 	}
 
 	err = json.Unmarshal(jbytes, &tst2)
@@ -181,7 +186,7 @@ func TestAmount_Float64(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			if got := NewFloatString(tt.a).Float64(); got != tt.want {
+			if got := MustFromString(tt.a).Float64(); got != tt.want {
 				t.Errorf("Amount.Float64() = %v, want %v (diff %v)", got, tt.want, math.Abs(got-tt.want))
 			}
 		})

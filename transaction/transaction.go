@@ -290,14 +290,14 @@ func (t *UserData) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 // ---
 
-// RegisterSysWallet transaction
-type RegisterSysWallet struct {
+// SetWalletTag transaction
+type SetWalletTag struct {
 	Address sumuslib.PublicKey
 	Tag     sumuslib.WalletTag
 }
 
 // Construct ...
-func (t *RegisterSysWallet) Construct(signer *signer.Signer, nonce uint64) (*SignedTransaction, error) {
+func (t *SetWalletTag) Construct(signer *signer.Signer, nonce uint64) (*SignedTransaction, error) {
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
 		ser.PutPublicKey(signer.PublicKey()) // signer public key
 		ser.PutPublicKey(t.Address)          // address / public key
@@ -306,7 +306,7 @@ func (t *RegisterSysWallet) Construct(signer *signer.Signer, nonce uint64) (*Sig
 }
 
 // Parse ...
-func (t *RegisterSysWallet) Parse(r io.Reader) (*ParsedTransaction, error) {
+func (t *SetWalletTag) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
 		ret := des.GetPublicKey()      // signer public key
@@ -325,14 +325,14 @@ func (t *RegisterSysWallet) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 // ---
 
-// UnregisterSysWallet transaction
-type UnregisterSysWallet struct {
+// UnsetWalletTag transaction
+type UnsetWalletTag struct {
 	Address sumuslib.PublicKey
 	Tag     sumuslib.WalletTag
 }
 
 // Construct ...
-func (t *UnregisterSysWallet) Construct(signer *signer.Signer, nonce uint64) (*SignedTransaction, error) {
+func (t *UnsetWalletTag) Construct(signer *signer.Signer, nonce uint64) (*SignedTransaction, error) {
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
 		ser.PutPublicKey(signer.PublicKey()) // signer public key
 		ser.PutPublicKey(t.Address)          // address / public key
@@ -341,7 +341,7 @@ func (t *UnregisterSysWallet) Construct(signer *signer.Signer, nonce uint64) (*S
 }
 
 // Parse ...
-func (t *UnregisterSysWallet) Parse(r io.Reader) (*ParsedTransaction, error) {
+func (t *UnsetWalletTag) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
 		ret := des.GetPublicKey()      // signer public key

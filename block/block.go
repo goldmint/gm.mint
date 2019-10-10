@@ -15,6 +15,8 @@ type Header struct {
 	Version uint16
 	// PrevBlockDigest
 	PrevBlockDigest sumuslib.Digest
+	// ConsensusRound
+	ConsensusRound uint16
 	// MerkleRoot
 	MerkleRoot sumuslib.Digest
 	// Timestamp of the block
@@ -54,6 +56,7 @@ func Parse(r io.Reader, cbkHeader CbkHeader, cbkTransaction CbkTransaction) erro
 	header := &Header{}
 	header.Version = d.GetUint16()           // version
 	header.PrevBlockDigest = d.GetDigest()   // previous block digest
+	header.ConsensusRound = d.GetUint16()    // consensus round
 	header.MerkleRoot = d.GetDigest()        // merkle root
 	header.Timestamp = d.GetUint64()         // time
 	header.TransactionsCount = d.GetUint16() // transactions

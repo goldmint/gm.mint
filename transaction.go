@@ -14,10 +14,10 @@ const (
 	TransactionUnregisterNode Transaction = 2
 	// TransactionTransferAssets sends token between wallets
 	TransactionTransferAssets Transaction = 10
-	// TransactionRegisterSystemWallet registers system wallet
-	TransactionRegisterSystemWallet Transaction = 3
-	// TransactionUnregisterSystemWallet unregisters system wallet
-	TransactionUnregisterSystemWallet Transaction = 4
+	// TransactionSetWalletTag sets wallet tag
+	TransactionSetWalletTag Transaction = 3
+	// TransactionUnsetWalletTag unsets wallet tag
+	TransactionUnsetWalletTag Transaction = 4
 	// TransactionUserData contains custom payload
 	TransactionUserData Transaction = 7
 	// TransactionDistributionFee sends block fee to owner
@@ -26,13 +26,13 @@ const (
 
 // TransactionToString definition
 var TransactionToString = map[Transaction]string{
-	TransactionRegisterNode:           "RegisterNodeTransaction",
-	TransactionUnregisterNode:         "UnregisterNodeTransaction",
-	TransactionTransferAssets:         "TransferAssetsTransaction",
-	TransactionRegisterSystemWallet:   "RegisterSystemWalletTransaction",
-	TransactionUnregisterSystemWallet: "UnregisterSystemWalletTransaction",
-	TransactionUserData:               "UserDataTransaction",
-	TransactionDistributionFee:        "DistributionFeeTransaction",
+	TransactionRegisterNode:    "RegisterNodeTransaction",
+	TransactionUnregisterNode:  "UnregisterNodeTransaction",
+	TransactionTransferAssets:  "TransferAssetsTransaction",
+	TransactionSetWalletTag:    "SetWalletTagTransaction",
+	TransactionUnsetWalletTag:  "UnsetWalletTagTransaction",
+	TransactionUserData:        "UserDataTransaction",
+	TransactionDistributionFee: "DistributionFeeTransaction",
 }
 
 // String representation

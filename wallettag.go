@@ -10,7 +10,7 @@ type WalletTag uint8
 const (
 	// WalletTagNode is node wallet
 	WalletTagNode WalletTag = iota + 1
-	// WalletTagGenesisNode is node wallet (TODO: clarify)
+	// WalletTagGenesisNode is node wallet from genesis block
 	WalletTagGenesisNode
 	// WalletTagSupervisor is controller wallet who can tag other wallets
 	WalletTagSupervisor
@@ -18,18 +18,24 @@ const (
 	WalletTagOwner
 	// WalletTagEmission emits token without a fee
 	WalletTagEmission
-	// WalletTagData can send UserData transactions without a fee
-	WalletTagData
+	// WalletTagNoFee can send transactions without a fee
+	WalletTagNoFee
+	// WalletTagApproved is approved user's wallet that is able to send or receive tokens
+	WalletTagApproved
+	// WalletTagAuthority is certification authority wallet that is able to approve users' wallets
+	WalletTagAuthority
 )
 
 // WalletTagToString definition
 var WalletTagToString = map[WalletTag]string{
-	WalletTagNode:        "Node",
-	WalletTagGenesisNode: "GenesisNode",
-	WalletTagSupervisor:  "SupervisorWallet",
-	WalletTagOwner:       "OwnerWallet",
-	WalletTagEmission:    "EmissionWallet",
-	WalletTagData:        "DataWallet",
+	WalletTagNode:        "node",
+	WalletTagGenesisNode: "gnode",
+	WalletTagSupervisor:  "supervisor",
+	WalletTagOwner:       "owner",
+	WalletTagEmission:    "emission",
+	WalletTagNoFee:       "nofee",
+	WalletTagApproved:    "approved",
+	WalletTagAuthority:   "authority",
 }
 
 // String representation

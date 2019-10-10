@@ -44,15 +44,15 @@ func TestConstructParse(t *testing.T) {
 			},
 		},
 		{
-			"RegisterSysWallet",
-			&RegisterSysWallet{
+			"SetWalletTag",
+			&SetWalletTag{
 				Address: signer.PublicKey(),
 				Tag:     sumuslib.WalletTagSupervisor,
 			},
 		},
 		{
-			"UnregisterSysWallet",
-			&UnregisterSysWallet{
+			"UnsetWalletTag",
+			&UnsetWalletTag{
 				Address: signer.PublicKey(),
 				Tag:     sumuslib.WalletTagEmission,
 			},

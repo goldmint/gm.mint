@@ -173,7 +173,8 @@ type ITransaction interface {
 
 // RegisterNode transaction
 type RegisterNode struct {
-	NodeAddress string
+	NodeAddress sumuslib.PublicKey
+	NodeIP      string
 }
 
 // Construct ...
@@ -181,7 +182,8 @@ func (t *RegisterNode) Construct(signer *signer.Signer, nonce uint64) (*SignedTr
 
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
 		ser.PutPublicKey(signer.PublicKey()) // signer public key
-		ser.PutString64(t.NodeAddress)       // node address
+		ser.PutPublicKey(t.NodeAddress)      // node public key
+		ser.PutString64(t.NodeIP)            // node ip
 	})
 }
 
@@ -189,8 +191,9 @@ func (t *RegisterNode) Construct(signer *signer.Signer, nonce uint64) (*SignedTr
 func (t *RegisterNode) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
-		ret := des.GetPublicKey()         // signer public key
-		t.NodeAddress = des.GetString64() // node address
+		ret := des.GetPublicKey()          // signer public key
+		t.NodeAddress = des.GetPublicKey() // node public key
+		t.NodeIP = des.GetString64()       // node ip
 		return ret, nil
 	})
 }

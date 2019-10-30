@@ -22,7 +22,8 @@ func TestConstructParse(t *testing.T) {
 		{
 			"RegisterNode",
 			&RegisterNode{
-				NodeAddress: "127.0.0.1",
+				NodeAddress: signer.PublicKey(),
+				NodeIP:      "127.0.0.1",
 			},
 		},
 		{

@@ -28,7 +28,9 @@ func TestConstructParse(t *testing.T) {
 		},
 		{
 			"UnregisterNode",
-			&UnregisterNode{},
+			&UnregisterNode{
+				NodeAddress: signer.PublicKey(),
+			},
 		},
 		{
 			"TransferAsset",

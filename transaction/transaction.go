@@ -202,6 +202,7 @@ func (t *RegisterNode) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 // UnregisterNode transaction
 type UnregisterNode struct {
+	NodeAddress sumuslib.PublicKey
 }
 
 // Construct ...
@@ -209,6 +210,7 @@ func (t *UnregisterNode) Construct(signer *signer.Signer, nonce uint64) (*Signed
 
 	return construct(signer, nonce, func(ser *serializer.Serializer) {
 		ser.PutPublicKey(signer.PublicKey()) // signer public key
+		ser.PutPublicKey(t.NodeAddress)      // node public key
 	})
 }
 
@@ -216,7 +218,8 @@ func (t *UnregisterNode) Construct(signer *signer.Signer, nonce uint64) (*Signed
 func (t *UnregisterNode) Parse(r io.Reader) (*ParsedTransaction, error) {
 
 	return parse(r, func(des *serializer.Deserializer) (sumuslib.PublicKey, error) {
-		ret := des.GetPublicKey() // signer public key
+		ret := des.GetPublicKey()          // signer public key
+		t.NodeAddress = des.GetPublicKey() // node public key
 		return ret, nil
 	})
 }

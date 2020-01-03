@@ -18,7 +18,7 @@ func TestDateToStamp(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := DateToStamp(tt.stamp)
+			got := StampToTime(tt.stamp)
 			if got.Format("2006-Jan-02 15:04:05") != tt.want {
 				t.Errorf("DateToStamp() = %v, expected %v", got, tt.want)
 			}

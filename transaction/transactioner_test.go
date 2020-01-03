@@ -20,20 +20,20 @@ func TestConstructParse(t *testing.T) {
 		tx   interface{}
 	}{
 		{
-			"RegisterNode",
+			"register_node",
 			&RegisterNode{
 				NodeAddress: signer.PublicKey(),
 				NodeIP:      "127.0.0.1",
 			},
 		},
 		{
-			"UnregisterNode",
+			"unregister_node",
 			&UnregisterNode{
 				NodeAddress: signer.PublicKey(),
 			},
 		},
 		{
-			"TransferAsset",
+			"transfer_asset",
 			&TransferAsset{
 				Address: signer.PublicKey(),
 				Token:   sumuslib.TokenGOLD,
@@ -41,27 +41,27 @@ func TestConstructParse(t *testing.T) {
 			},
 		},
 		{
-			"UserData",
+			"user_data",
 			&UserData{
 				Data: []byte{0xDE, 0xAD, 0xBE, 0xEF},
 			},
 		},
 		{
-			"SetWalletTag",
+			"set_wallet_tag",
 			&SetWalletTag{
 				Address: signer.PublicKey(),
 				Tag:     sumuslib.WalletTagSupervisor,
 			},
 		},
 		{
-			"UnsetWalletTag",
+			"unset_wallet_tag",
 			&UnsetWalletTag{
 				Address: signer.PublicKey(),
 				Tag:     sumuslib.WalletTagEmission,
 			},
 		},
 		{
-			"DistributionFee",
+			"distribution_fee",
 			&DistributionFee{
 				OwnerAddress: signer.PublicKey(),
 				AmountMNT:    amount.MustFromString("1.666"),
@@ -74,16 +74,16 @@ func TestConstructParse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			// construct and sign
-			signed, err := tt.tx.(ITransaction).Construct(signer, rand.Uint64())
+			signed, err := tt.tx.(Transactioner).Sign(signer, rand.Uint64())
 			if err != nil {
-				t.Errorf("Construct() error = %v", err)
+				t.Errorf("Sign() error = %v", err)
 				return
 			}
 
 			// parse back
 			buf := bytes.NewBuffer(signed.Data)
 			tx := reflect.New(reflect.TypeOf(tt.tx).Elem()).Interface()
-			_, err = tx.(ITransaction).Parse(buf)
+			_, err = tx.(Transactioner).Parse(buf)
 			if err != nil {
 				t.Errorf("Parse() error = %v", err)
 				return

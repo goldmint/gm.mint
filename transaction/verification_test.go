@@ -28,7 +28,7 @@ func TestTransferAssetTransactionVerification(t *testing.T) {
 		Address: dst.PublicKey(),
 		Token:   token,
 		Amount:  tokenAmount,
-	}).Construct(src, nonce)
+	}).Sign(src, nonce)
 	if err != nil {
 		t.Fatal(err)
 	}

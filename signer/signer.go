@@ -31,20 +31,26 @@ func New() (*Signer, error) {
 	}, nil
 }
 
+// FromPrivateKey makes keypair from prehashed private key
+func FromPrivateKey(k sumuslib.PrivateKey) *Signer {
+	return &Signer{
+		privateKey:  k[:],
+		publicKey:   ed25519.PublicKeyFromPrehashedPK(k[:]),
+		initialized: true,
+	}
+}
+
 // FromBytes makes keypair from prehashed private key
 func FromBytes(b []byte) (*Signer, error) {
-
 	pvt, err := sumuslib.BytesToPrivateKey(b)
 	if err != nil {
 		return nil, err
 	}
-
 	ret := &Signer{
 		privateKey:  pvt[:],
 		publicKey:   ed25519.PublicKeyFromPrehashedPK(pvt[:]),
 		initialized: true,
 	}
-
 	return ret, nil
 }
 

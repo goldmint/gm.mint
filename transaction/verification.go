@@ -9,7 +9,7 @@ import (
 )
 
 // Verify transaction payload
-func Verify(address sumuslib.PublicKey, payload []byte, signature sumuslib.Signature) error {
+func Verify(from sumuslib.PublicKey, payload []byte, signature sumuslib.Signature) error {
 	if len(payload) == 0 {
 		return fmt.Errorf("invalid payload")
 	}
@@ -23,5 +23,5 @@ func Verify(address sumuslib.PublicKey, payload []byte, signature sumuslib.Signa
 	digest := hasher.Sum(nil)
 
 	// verify
-	return signer.Verify(address, digest, signature)
+	return signer.Verify(from, digest, signature)
 }

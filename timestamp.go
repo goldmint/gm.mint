@@ -12,8 +12,8 @@ func init() {
 	epochStart = time.Date(1400, 01, 01, 00, 00, 00, 000000, loc)
 }
 
-// DateToStamp (Sumus timestamp)
-func DateToStamp(timestamp uint64) time.Time {
+// StampToTime converts mint timestamp to time.Time
+func StampToTime(timestamp uint64) time.Time {
 	const spd uint64 = 86400
 	const mcsm uint64 = 1000000
 

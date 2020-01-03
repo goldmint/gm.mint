@@ -1,9 +1,13 @@
 package block
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"math/big"
+
+	"github.com/void616/gm-sumuslib/transaction"
+	"golang.org/x/crypto/sha3"
 
 	sumuslib "github.com/void616/gm-sumuslib"
 	"github.com/void616/gm-sumuslib/serializer"
@@ -23,12 +27,14 @@ type Header struct {
 	Timestamp uint64
 	// TransactionsCount in the block
 	TransactionsCount uint16
-	// BlockNumber
-	BlockNumber *big.Int
+	// BlockID
+	BlockID *big.Int
 	// SignersCount
 	SignersCount uint16
 	// Signers list
 	Signers []Signer
+	// Digest (header)
+	Digest sumuslib.Digest
 }
 
 // Signer data
@@ -43,25 +49,50 @@ type Signer struct {
 type CbkHeader func(*Header) error
 
 // CbkTransaction for parsed transaction
-type CbkTransaction func(sumuslib.Transaction, *serializer.Deserializer, *Header) error
+type CbkTransaction func(transaction.Code, *serializer.Deserializer, *Header) error
 
 // ---
 
 // Parse block
 func Parse(r io.Reader, cbkHeader CbkHeader, cbkTransaction CbkTransaction) error {
-
 	d := serializer.NewStreamDeserializer(r)
+
+	// read header data into buffer to get it's digest later
+	headerData := bytes.NewBuffer(nil)
+	hd := serializer.NewStreamDeserializer(io.TeeReader(r, headerData))
 
 	// read header
 	header := &Header{}
-	header.Version = d.GetUint16()           // version
-	header.PrevBlockDigest = d.GetDigest()   // previous block digest
-	header.ConsensusRound = d.GetUint16()    // consensus round
-	header.MerkleRoot = d.GetDigest()        // merkle root
-	header.Timestamp = d.GetUint64()         // time
-	header.TransactionsCount = d.GetUint16() // transactions
-	header.BlockNumber = d.GetUint256()      // block
-	header.SignersCount = d.GetUint16()      // signers
+	header.Version = hd.GetUint16()         // version
+	header.PrevBlockDigest = hd.GetDigest() // previous block digest
+	header.ConsensusRound = hd.GetUint16()  // consensus round
+	header.MerkleRoot = hd.GetDigest()      // merkle root
+
+	// we should provide timestamp length (4 bytes, uint32, ) to calculate header digest (kinda bug in node's code)
+	headerData.WriteByte(8)
+	headerData.WriteByte(0)
+	headerData.WriteByte(0)
+	headerData.WriteByte(0)
+
+	// continue to read header
+	header.Timestamp = hd.GetUint64()         // time
+	header.TransactionsCount = hd.GetUint16() // transactions
+	header.BlockID = hd.GetUint256()          // block
+	if err := hd.Error(); err != nil {
+		return err
+	}
+
+	// calc header digest
+	{
+		hasher := sha3.New256()
+		if _, err := hasher.Write(headerData.Bytes()); err != nil {
+			return err
+		}
+		copy(header.Digest[:], hasher.Sum(nil))
+	}
+
+	// continue to read header
+	header.SignersCount = d.GetUint16() // signers
 	if err := d.Error(); err != nil {
 		return err
 	}
@@ -88,19 +119,19 @@ func Parse(r io.Reader, cbkHeader CbkHeader, cbkTransaction CbkTransaction) erro
 	// read transactions
 	for i := uint16(0); i < header.TransactionsCount; i++ {
 
-		txCode := d.GetUint16() // code
+		code := d.GetUint16() // code
 		if err := d.Error(); err != nil {
 			return err
 		}
 
 		// check the code
-		if !sumuslib.ValidTransaction(txCode) {
-			return fmt.Errorf("unknown transaction with code `%v` at index %v", txCode, i)
+		if !transaction.ValidCode(code) {
+			return fmt.Errorf("unknown transaction code %v at index %v", code, i)
 		}
-		txType := sumuslib.Transaction(txCode)
+		txCode := transaction.Code(code)
 
 		// parse transaction outside
-		if err := cbkTransaction(txType, d, header); err != nil {
+		if err := cbkTransaction(txCode, d, header); err != nil {
 			return err
 		}
 		if err := d.Error(); err != nil {

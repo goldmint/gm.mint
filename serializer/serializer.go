@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/amount"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/amount"
 )
 
 // NewSerializer instance
@@ -139,7 +139,7 @@ func (s *Serializer) PutString64(v string) *Serializer {
 }
 
 // PutPublicKey ...
-func (s *Serializer) PutPublicKey(v sumuslib.PublicKey) *Serializer {
+func (s *Serializer) PutPublicKey(v mint.PublicKey) *Serializer {
 	if s.err == nil {
 		n, err := s.buf.Write(v[:])
 		if err != nil {

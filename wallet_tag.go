@@ -1,4 +1,4 @@
-package sumuslib
+package mint
 
 import (
 	"fmt"

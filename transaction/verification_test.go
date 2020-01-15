@@ -4,24 +4,24 @@ import (
 	"bytes"
 	"testing"
 
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/amount"
-	"github.com/void616/gm-sumuslib/serializer"
-	"github.com/void616/gm-sumuslib/signer"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/amount"
+	"github.com/void616/gm.mint/serializer"
+	"github.com/void616/gm.mint/signer"
 )
 
 func TestTransferAssetTransactionVerification(t *testing.T) {
 
 	nonce := uint64(2)
-	token := sumuslib.TokenMNT
+	token := mint.TokenMNT
 	tokenAmount := amount.MustFromString("123.666")
 
 	// ---
 
-	srcpk, _ := sumuslib.Unpack58("TBzyWv8Dga5aN4Hai2nFTwyTXvDJKkJhq8HMDPC9zqTWLSTLo4jFFKKnVS52a1kp7YJdm2b8HrR2Buk9PqyD1DwhxUzsJ")
+	srcpk, _ := mint.Unpack58("TBzyWv8Dga5aN4Hai2nFTwyTXvDJKkJhq8HMDPC9zqTWLSTLo4jFFKKnVS52a1kp7YJdm2b8HrR2Buk9PqyD1DwhxUzsJ")
 	src, _ := signer.FromBytes(srcpk)
 
-	dstpk, _ := sumuslib.Unpack58("FhM2u3UMtexZ3TU57G6d9iDpcmynBSpzmTZq6YaMPeA6DHFdEht3jcZUDpXyVbXGoXoWiYB9z8QVKjGhZuKCqMGYZE2P6")
+	dstpk, _ := mint.Unpack58("FhM2u3UMtexZ3TU57G6d9iDpcmynBSpzmTZq6YaMPeA6DHFdEht3jcZUDpXyVbXGoXoWiYB9z8QVKjGhZuKCqMGYZE2P6")
 	dst, _ := signer.FromBytes(dstpk)
 
 	tx, err := (&TransferAsset{
@@ -61,7 +61,7 @@ func TestTransferAssetTransactionVerification(t *testing.T) {
 		t.Fatal("Is not signed")
 	}
 
-	var tSignature sumuslib.Signature
+	var tSignature mint.Signature
 	copy(tSignature[:], tSignatureBytes)
 
 	// verify if signed

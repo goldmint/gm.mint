@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	sumuslib "github.com/void616/gm-sumuslib"
+	mint "github.com/void616/gm.mint"
 )
 
 func TestSignerGeneration(t *testing.T) {
@@ -22,8 +22,8 @@ func TestSignerGeneration(t *testing.T) {
 
 func TestSignerFromSumusPrivateKey(t *testing.T) {
 
-	spvt, _ := sumuslib.Unpack58("TBzyWv8Dga5aN4Hai2nFTwyTXvDJKkJhq8HMDPC9zqTWLSTLo4jFFKKnVS52a1kp7YJdm2b8HrR2Buk9PqyD1DwhxUzsJ")
-	spub, _ := sumuslib.Unpack58("2p6QCcwAMLSSXfFFVQT4vYCe8VPwm3rvK4zdNGAM7zeLBqrVLW")
+	spvt, _ := mint.Unpack58("TBzyWv8Dga5aN4Hai2nFTwyTXvDJKkJhq8HMDPC9zqTWLSTLo4jFFKKnVS52a1kp7YJdm2b8HrR2Buk9PqyD1DwhxUzsJ")
+	spub, _ := mint.Unpack58("2p6QCcwAMLSSXfFFVQT4vYCe8VPwm3rvK4zdNGAM7zeLBqrVLW")
 
 	sig, _ := FromBytes(spvt)
 
@@ -35,8 +35,8 @@ func TestSignerFromSumusPrivateKey(t *testing.T) {
 
 func TestSignerFromSumusPrivateKey2(t *testing.T) {
 
-	spvt, _ := sumuslib.Unpack58("4CdzVBba43H7B12zNoSCE8dz8RM9ggUSagfxPdZ1kQ7hbrXLqNNUwGQiiV1VxU3xuEcj4ybxTZPnjq8BAhBUuJxzU8XxQ")
-	spub, _ := sumuslib.Unpack58("2PztA94iHZdeX8d5hPJbQfUGcN6WWUhfmU6G5ySJQ9cnUueiuk")
+	spvt, _ := mint.Unpack58("4CdzVBba43H7B12zNoSCE8dz8RM9ggUSagfxPdZ1kQ7hbrXLqNNUwGQiiV1VxU3xuEcj4ybxTZPnjq8BAhBUuJxzU8XxQ")
+	spub, _ := mint.Unpack58("2PztA94iHZdeX8d5hPJbQfUGcN6WWUhfmU6G5ySJQ9cnUueiuk")
 
 	sig, _ := FromBytes(spvt)
 

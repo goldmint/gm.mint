@@ -7,8 +7,8 @@ import (
 	"io"
 	"math/big"
 
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/amount"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/amount"
 )
 
 // NewDeserializer instance
@@ -140,11 +140,11 @@ func (s *Deserializer) GetString64() string {
 }
 
 // GetPublicKey ...
-func (s *Deserializer) GetPublicKey() sumuslib.PublicKey {
-	var pub sumuslib.PublicKey
+func (s *Deserializer) GetPublicKey() mint.PublicKey {
+	var pub mint.PublicKey
 
 	if s.err == nil {
-		b := s.GetBytes(sumuslib.PublicKeySize)
+		b := s.GetBytes(mint.PublicKeySize)
 		if b != nil {
 			copy(pub[:], b)
 		}
@@ -153,11 +153,11 @@ func (s *Deserializer) GetPublicKey() sumuslib.PublicKey {
 }
 
 // GetDigest ...
-func (s *Deserializer) GetDigest() sumuslib.Digest {
-	var d sumuslib.Digest
+func (s *Deserializer) GetDigest() mint.Digest {
+	var d mint.Digest
 
 	if s.err == nil {
-		b := s.GetBytes(sumuslib.DigestSize)
+		b := s.GetBytes(mint.DigestSize)
 		if b != nil {
 			copy(d[:], b)
 		}
@@ -166,11 +166,11 @@ func (s *Deserializer) GetDigest() sumuslib.Digest {
 }
 
 // GetSignature ...
-func (s *Deserializer) GetSignature() sumuslib.Signature {
-	var sig sumuslib.Signature
+func (s *Deserializer) GetSignature() mint.Signature {
+	var sig mint.Signature
 
 	if s.err == nil {
-		b := s.GetBytes(sumuslib.SignatureSize)
+		b := s.GetBytes(mint.SignatureSize)
 		if b != nil {
 			copy(sig[:], b)
 		}

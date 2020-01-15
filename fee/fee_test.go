@@ -3,7 +3,7 @@ package fee
 import (
 	"testing"
 
-	"github.com/void616/gm-sumuslib/amount"
+	"github.com/void616/gm.mint/amount"
 )
 
 func TestGoldFee(t *testing.T) {

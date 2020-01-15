@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"io"
 
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/amount"
-	"github.com/void616/gm-sumuslib/signer"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/amount"
+	"github.com/void616/gm.mint/signer"
 )
 
 var _ = Transactioner(&TransferAsset{})
 
 // TransferAsset transaction data
 type TransferAsset struct {
-	Address sumuslib.PublicKey
-	Token   sumuslib.Token
+	Address mint.PublicKey
+	Token   mint.Token
 	Amount  *amount.Amount
 }
 
@@ -39,10 +39,10 @@ func (t *TransferAsset) Parse(r io.Reader) (*ParsedTransaction, error) {
 	t.Address = pars.GetPublicKey() // address / public key
 	t.Amount = pars.GetAmount()     // amount
 	// ensure token is valid
-	if !sumuslib.ValidToken(tokenCode) {
+	if !mint.ValidToken(tokenCode) {
 		return nil, fmt.Errorf("unknown token with code `%v`", tokenCode)
 	}
-	t.Token = sumuslib.Token(tokenCode)
+	t.Token = mint.Token(tokenCode)
 	return pars.Complete(from)
 }
 

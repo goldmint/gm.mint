@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"io"
 
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/serializer"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/serializer"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -20,9 +20,9 @@ type parser struct {
 // ParsedTransaction data
 type ParsedTransaction struct {
 	Nonce     uint64
-	From      sumuslib.PublicKey
-	Digest    sumuslib.Digest
-	Signature sumuslib.Signature
+	From      mint.PublicKey
+	Digest    mint.Digest
+	Signature mint.Signature
 }
 
 func newParser(r io.Reader) (*parser, error) {
@@ -44,14 +44,14 @@ func newParser(r io.Reader) (*parser, error) {
 }
 
 // Complete completes parsing and returns a parsed transaction common data
-func (p *parser) Complete(from sumuslib.PublicKey) (*ParsedTransaction, error) {
+func (p *parser) Complete(from mint.PublicKey) (*ParsedTransaction, error) {
 	// errors?
 	if err := p.Error(); err != nil {
 		return nil, err
 	}
 
 	// calc tx digest
-	var digest sumuslib.Digest
+	var digest mint.Digest
 	{
 		hasher := sha3.New256()
 		_, err := hasher.Write(p.digestWriter.Bytes())
@@ -69,11 +69,11 @@ func (p *parser) Complete(from sumuslib.PublicKey) (*ParsedTransaction, error) {
 	}
 
 	// get signature if the tx is signed
-	var signature sumuslib.Signature
+	var signature mint.Signature
 	{
 		if signed != 0 {
 			// signature
-			b := p.GetBytes(sumuslib.SignatureSize)
+			b := p.GetBytes(mint.SignatureSize)
 			if err := p.Error(); err != nil {
 				return nil, err
 			}
@@ -81,7 +81,7 @@ func (p *parser) Complete(from sumuslib.PublicKey) (*ParsedTransaction, error) {
 			// TODO: verify signature?
 		} else {
 			// digest
-			_ = p.GetBytes(sumuslib.DigestSize)
+			_ = p.GetBytes(mint.DigestSize)
 			if err := p.Error(); err != nil {
 				return nil, err
 			}

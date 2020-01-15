@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/void616/gm-sumuslib/signer"
+	"github.com/void616/gm.mint/signer"
 )
 
 // Transactioner is a transaction interface

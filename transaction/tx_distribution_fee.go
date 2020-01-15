@@ -3,16 +3,16 @@ package transaction
 import (
 	"io"
 
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/amount"
-	"github.com/void616/gm-sumuslib/signer"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/amount"
+	"github.com/void616/gm.mint/signer"
 )
 
 var _ = Transactioner(&DistributionFee{})
 
 // DistributionFee transaction data
 type DistributionFee struct {
-	OwnerAddress sumuslib.PublicKey
+	OwnerAddress mint.PublicKey
 	AmountMNT    *amount.Amount
 	AmountGOLD   *amount.Amount
 }

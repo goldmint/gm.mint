@@ -6,11 +6,11 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/void616/gm-sumuslib/transaction"
+	"github.com/void616/gm.mint/transaction"
 	"golang.org/x/crypto/sha3"
 
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/serializer"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/serializer"
 )
 
 // Header data
@@ -18,11 +18,11 @@ type Header struct {
 	// Version of the blockchain
 	Version uint16
 	// PrevBlockDigest
-	PrevBlockDigest sumuslib.Digest
+	PrevBlockDigest mint.Digest
 	// ConsensusRound
 	ConsensusRound uint16
 	// MerkleRoot
-	MerkleRoot sumuslib.Digest
+	MerkleRoot mint.Digest
 	// Timestamp of the block
 	Timestamp uint64
 	// TransactionsCount in the block
@@ -34,15 +34,15 @@ type Header struct {
 	// Signers list
 	Signers []Signer
 	// Digest (header)
-	Digest sumuslib.Digest
+	Digest mint.Digest
 }
 
 // Signer data
 type Signer struct {
 	// PublicKey
-	PublicKey sumuslib.PublicKey
+	PublicKey mint.PublicKey
 	// Signature
-	Signature sumuslib.Signature
+	Signature mint.Signature
 }
 
 // CbkHeader for parsed header

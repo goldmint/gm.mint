@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"io"
 
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/signer"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/signer"
 )
 
 var _ = Transactioner(&SetWalletTag{})
 
 // SetWalletTag transaction data
 type SetWalletTag struct {
-	Address sumuslib.PublicKey
-	Tag     sumuslib.WalletTag
+	Address mint.PublicKey
+	Tag     mint.WalletTag
 }
 
 // Sign impl
@@ -35,10 +35,10 @@ func (t *SetWalletTag) Parse(r io.Reader) (*ParsedTransaction, error) {
 	t.Address = pars.GetPublicKey() // address / public key
 	tagCode := pars.GetByte()       // tag
 	// ensure tag is valid
-	if !sumuslib.ValidWalletTag(tagCode) {
+	if !mint.ValidWalletTag(tagCode) {
 		return nil, fmt.Errorf("unknown wallet tag with code `%v`", tagCode)
 	}
-	t.Tag = sumuslib.WalletTag(tagCode)
+	t.Tag = mint.WalletTag(tagCode)
 	return pars.Complete(from)
 }
 

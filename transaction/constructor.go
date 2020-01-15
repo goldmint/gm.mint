@@ -1,9 +1,9 @@
 package transaction
 
 import (
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/serializer"
-	"github.com/void616/gm-sumuslib/signer"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/serializer"
+	"github.com/void616/gm.mint/signer"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -14,9 +14,9 @@ type constructor struct {
 
 // SignedTransaction data
 type SignedTransaction struct {
-	Digest    sumuslib.Digest
+	Digest    mint.Digest
 	Data      []byte
-	Signature sumuslib.Signature
+	Signature mint.Signature
 }
 
 func newConstructor(nonce uint64) *constructor {
@@ -39,7 +39,7 @@ func (c *constructor) Sign(signer *signer.Signer) (*SignedTransaction, error) {
 	}
 
 	// make payload digest
-	var txdigest sumuslib.Digest
+	var txdigest mint.Digest
 	{
 		hasher := sha3.New256()
 		_, err = hasher.Write(payload)

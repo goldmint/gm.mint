@@ -1,8 +1,8 @@
 package signer
 
 import (
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/signer/ed25519"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/signer/ed25519"
 )
 
 // Signer data
@@ -32,7 +32,7 @@ func New() (*Signer, error) {
 }
 
 // FromPrivateKey makes keypair from prehashed private key
-func FromPrivateKey(k sumuslib.PrivateKey) *Signer {
+func FromPrivateKey(k mint.PrivateKey) *Signer {
 	return &Signer{
 		privateKey:  k[:],
 		publicKey:   ed25519.PublicKeyFromPrehashedPK(k[:]),
@@ -42,7 +42,7 @@ func FromPrivateKey(k sumuslib.PrivateKey) *Signer {
 
 // FromBytes makes keypair from prehashed private key
 func FromBytes(b []byte) (*Signer, error) {
-	pvt, err := sumuslib.BytesToPrivateKey(b)
+	pvt, err := mint.BytesToPrivateKey(b)
 	if err != nil {
 		return nil, err
 	}
@@ -63,25 +63,25 @@ func (s *Signer) assert() {
 }
 
 // Sign message with a key
-func (s *Signer) Sign(message []byte) sumuslib.Signature {
+func (s *Signer) Sign(message []byte) mint.Signature {
 	s.assert()
-	var sig sumuslib.Signature
+	var sig mint.Signature
 	copy(sig[:], ed25519.SignWithPrehashed(s.privateKey, s.publicKey, message))
 	return sig
 }
 
 // PrivateKey of the signer
-func (s *Signer) PrivateKey() sumuslib.PrivateKey {
+func (s *Signer) PrivateKey() mint.PrivateKey {
 	s.assert()
-	var k sumuslib.PrivateKey
+	var k mint.PrivateKey
 	copy(k[:], s.privateKey)
 	return k
 }
 
 // PublicKey of the signer
-func (s *Signer) PublicKey() sumuslib.PublicKey {
+func (s *Signer) PublicKey() mint.PublicKey {
 	s.assert()
-	var k sumuslib.PublicKey
+	var k mint.PublicKey
 	copy(k[:], s.publicKey)
 	return k
 }

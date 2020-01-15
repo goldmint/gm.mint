@@ -3,15 +3,15 @@ package transaction
 import (
 	"io"
 
-	sumuslib "github.com/void616/gm-sumuslib"
-	"github.com/void616/gm-sumuslib/signer"
+	mint "github.com/void616/gm.mint"
+	"github.com/void616/gm.mint/signer"
 )
 
 var _ = Transactioner(&UnregisterNode{})
 
 // UnregisterNode transaction data
 type UnregisterNode struct {
-	NodeAddress sumuslib.PublicKey
+	NodeAddress mint.PublicKey
 }
 
 // Sign impl

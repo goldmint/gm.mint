@@ -1,6 +1,8 @@
 package mint
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_maskString6p4(t *testing.T) {
 	tests := []struct {

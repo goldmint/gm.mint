@@ -38,9 +38,23 @@ func (p PublicKey) StringMask() string {
 	return MaskString6P4(p.String())
 }
 
-// MarshalJSON implements Json marshal
+// MarshalJSON impl
 func (p PublicKey) MarshalJSON() ([]byte, error) {
 	return json.Marshal(p.String())
+}
+
+// UnmarshalJSON impl
+func (p *PublicKey) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	x, err := ParsePublicKey(s)
+	if err != nil {
+		return err
+	}
+	copy(p[:], x[:])
+	return nil
 }
 
 // ParsePublicKey parses an instance from Base58 string
@@ -85,9 +99,23 @@ func (p PrivateKey) StringMask() string {
 	return MaskString6P4(p.String())
 }
 
-// MarshalJSON implements Json marshal
+// MarshalJSON impl
 func (p PrivateKey) MarshalJSON() ([]byte, error) {
 	return json.Marshal(p.String())
+}
+
+// UnmarshalJSON impl
+func (p *PrivateKey) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	x, err := ParsePrivateKey(s)
+	if err != nil {
+		return err
+	}
+	copy(p[:], x[:])
+	return nil
 }
 
 // ParsePrivateKey parses an instance from Base58 string
@@ -132,9 +160,23 @@ func (d Digest) StringMask() string {
 	return MaskString6P4(d.String())
 }
 
-// MarshalJSON implements Json marshal
+// MarshalJSON impl
 func (d Digest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d.String())
+}
+
+// UnmarshalJSON impl
+func (d *Digest) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	x, err := ParseDigest(s)
+	if err != nil {
+		return err
+	}
+	copy(d[:], x[:])
+	return nil
 }
 
 // ParseDigest parses an instance from Base58 string
@@ -179,9 +221,23 @@ func (s Signature) StringMask() string {
 	return MaskString6P4(s.String())
 }
 
-// MarshalJSON implements Json marshal
+// MarshalJSON impl
 func (s Signature) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String())
+}
+
+// UnmarshalJSON impl
+func (s *Signature) UnmarshalJSON(b []byte) error {
+	var str string
+	if err := json.Unmarshal(b, &str); err != nil {
+		return err
+	}
+	x, err := ParseSignature(str)
+	if err != nil {
+		return err
+	}
+	copy(s[:], x[:])
+	return nil
 }
 
 // ParseSignature parses an instance from Base58 string

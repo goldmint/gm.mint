@@ -11,17 +11,17 @@ const (
 	// RegisterNodeTx ...
 	RegisterNodeTx Code = 1
 	// UnregisterNodeTx ...
-	UnregisterNodeTx = 2
+	UnregisterNodeTx Code = 2
 	// SetWalletTagTx ...
-	SetWalletTagTx = 3
+	SetWalletTagTx Code = 3
 	// UnsetWalletTagTx ...
-	UnsetWalletTagTx = 4
+	UnsetWalletTagTx Code = 4
 	// UserDataTx ...
-	UserDataTx = 7
+	UserDataTx Code = 7
 	// TransferAssetTx ...
-	TransferAssetTx = 10
+	TransferAssetTx Code = 10
 	// DistributionFeeTx ...
-	DistributionFeeTx = 11
+	DistributionFeeTx Code = 11
 )
 
 var codeToString = map[Code]string{

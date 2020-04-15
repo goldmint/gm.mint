@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestDateToStamp(t *testing.T) {
+func TestStampToTime(t *testing.T) {
 
 	tests := []struct {
 		name  string

@@ -18,11 +18,11 @@ func TestTransferAssetTransactionVerification(t *testing.T) {
 
 	// ---
 
-	srcpk, _ := mint.Unpack58("TBzyWv8Dga5aN4Hai2nFTwyTXvDJKkJhq8HMDPC9zqTWLSTLo4jFFKKnVS52a1kp7YJdm2b8HrR2Buk9PqyD1DwhxUzsJ")
-	src, _ := signer.FromBytes(srcpk)
+	srcpk, _ := mint.ParsePrivateKey("TBzyWv8Dga5aN4Hai2nFTwyTXvDJKkJhq8HMDPC9zqTWLSTLo4jFFKKnVS52a1kp7YJdm2b8HrR2Buk9PqyD1DwhxUzsJ")
+	src := signer.FromPrivateKey(srcpk)
 
-	dstpk, _ := mint.Unpack58("FhM2u3UMtexZ3TU57G6d9iDpcmynBSpzmTZq6YaMPeA6DHFdEht3jcZUDpXyVbXGoXoWiYB9z8QVKjGhZuKCqMGYZE2P6")
-	dst, _ := signer.FromBytes(dstpk)
+	dstpk, _ := mint.ParsePrivateKey("FhM2u3UMtexZ3TU57G6d9iDpcmynBSpzmTZq6YaMPeA6DHFdEht3jcZUDpXyVbXGoXoWiYB9z8QVKjGhZuKCqMGYZE2P6")
+	dst := signer.FromPrivateKey(dstpk)
 
 	tx, err := (&TransferAsset{
 		Address: dst.PublicKey(),

@@ -10,7 +10,7 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/void616/gm.mint/signer/ed25519/internal/edwards25519"
+	"github.com/void616/gm.mint/internal/ed25519/internal/edwards25519"
 )
 
 type zeroReader struct{}

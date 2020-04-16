@@ -11,8 +11,8 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
-// New generates a new seed phrase and related private key
-func New(extraWord string) (phrase string, pvt mint.PrivateKey, err error) {
+// New generates a new seed phrase
+func New() (phrase string, err error) {
 
 	// random bytes
 	entropySize := 32
@@ -28,12 +28,6 @@ func New(extraWord string) (phrase string, pvt mint.PrivateKey, err error) {
 
 	// random phrase
 	phrase, err = bip39.NewMnemonic(entropy)
-	if err != nil {
-		return
-	}
-
-	// make a private key
-	pvt, err = Recover(phrase, extraWord)
 	if err != nil {
 		return
 	}

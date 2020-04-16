@@ -8,11 +8,17 @@ import (
 func TestMnemonic(t *testing.T) {
 
 	// new
-	phrase, pk, err := New("password")
+	phrase, err := New()
 	if err != nil {
 		t.Fatal(err)
 	}
 	// t.Logf("Phrase: %v", phrase)
+
+	// get private key from phrase
+	pk, err := Recover(phrase, "password")
+	if err != nil {
+		t.Fatal(err)
+	}
 	// t.Logf("Private Key: %v", pk.String())
 
 	// phrase is valid
@@ -48,12 +54,12 @@ func TestMnemonic(t *testing.T) {
 		t.Fatal("Should be different private key")
 	}
 
-	// recover with valid phrase and password
+	// recover again with
 	samePK, err := Recover(phrase, "password")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !bytes.Equal(samePK.Bytes(), pk.Bytes()) {
-		t.Fatal("Should be different private key")
+		t.Fatal("Should be same private key")
 	}
 }
